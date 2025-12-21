@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
+import { Header } from "@/components/layout/Header";
 
 export const metadata: Metadata = {
   title: "플랜틀리-제조솔루션, 더 많은 눈에 쉽게 띄다",
@@ -24,7 +26,11 @@ export default function RootLayout({
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
         />
       </head>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <Header />
+        <main>{children}</main>
+        <Toaster />
+      </body>
     </html>
   );
 }
