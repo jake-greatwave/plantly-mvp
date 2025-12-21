@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { Header } from "@/components/layout/Header";
+import { TokenRefreshProvider } from "@/components/providers/TokenRefreshProvider";
 
 export const metadata: Metadata = {
   title: "플랜틀리-제조솔루션, 더 많은 눈에 쉽게 띄다",
@@ -27,9 +28,11 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <Header />
-        <main>{children}</main>
-        <Toaster />
+        <TokenRefreshProvider>
+          <Header />
+          <main>{children}</main>
+          <Toaster />
+        </TokenRefreshProvider>
       </body>
     </html>
   );

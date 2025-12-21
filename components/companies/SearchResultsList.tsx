@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { SearchResultCard } from "./SearchResultCard";
 import { CompanyPagination } from "./CompanyPagination";
 import { SearchResultsSkeleton } from "./SearchResultsSkeleton";
+import { SearchBar } from "./SearchBar";
 import {
   Empty,
   EmptyHeader,
@@ -60,15 +61,21 @@ export function SearchResultsList() {
         const params = new URLSearchParams();
         const search = searchParams.get("search");
         const page = searchParams.get("page") || "1";
+        const parentCategoryId = searchParams.get("parent_category_id");
         const categoryId = searchParams.get("category_id");
         const regionId = searchParams.get("region_id");
+        const countries = searchParams.get("countries");
+        const industries = searchParams.get("industries");
         const isVerified = searchParams.get("is_verified");
         const isFeatured = searchParams.get("is_featured");
 
         if (search) params.set("search", search);
         params.set("page", page);
+        if (parentCategoryId) params.set("parent_category_id", parentCategoryId);
         if (categoryId) params.set("category_id", categoryId);
         if (regionId) params.set("region_id", regionId);
+        if (countries) params.set("countries", countries);
+        if (industries) params.set("industries", industries);
         if (isVerified) params.set("is_verified", isVerified);
         if (isFeatured) params.set("is_featured", isFeatured);
 
@@ -103,53 +110,39 @@ export function SearchResultsList() {
     );
   }
 
-  if (companies.length === 0) {
-    return (
-      <Empty>
-        <EmptyHeader>
-          <EmptyMedia>
-            <Building2 className="w-12 h-12 text-gray-400" />
-          </EmptyMedia>
-          <EmptyTitle>검색 결과가 없습니다</EmptyTitle>
-          <EmptyDescription>
-            다른 검색어로 시도해보시거나 필터를 조정해보세요.
-          </EmptyDescription>
-        </EmptyHeader>
-      </Empty>
-    );
-  }
-
-  const search = searchParams.get("search") || "";
-
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          {search ? `"${search}" 검색 결과` : "전체 기업"}
-        </h1>
-        <p className="text-gray-600 mb-4">
-          {search
-            ? `검색어 "${search}"에 대한 결과를 표시합니다.`
-            : "등록된 모든 기업을 확인하세요."}
-        </p>
-        {pagination && (
-          <p className="text-sm text-gray-600">
-            총 {pagination.total.toLocaleString()}개의 기업이 있습니다.
-          </p>
-        )}
+        <SearchBar />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {companies.map((company) => (
-          <SearchResultCard key={company.id} company={company} />
-        ))}
-      </div>
+      {companies.length === 0 ? (
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia>
+              <Building2 className="w-12 h-12 text-gray-400" />
+            </EmptyMedia>
+            <EmptyTitle>검색 결과가 없습니다</EmptyTitle>
+            <EmptyDescription>
+              다른 검색어로 시도해보시거나 필터를 조정해보세요.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {companies.map((company) => (
+              <SearchResultCard key={company.id} company={company} />
+            ))}
+          </div>
 
-      {pagination && (
-        <CompanyPagination
-          currentPage={pagination.page}
-          totalPages={pagination.totalPages}
-        />
+          {pagination && (
+            <CompanyPagination
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
+            />
+          )}
+        </>
       )}
     </>
   );

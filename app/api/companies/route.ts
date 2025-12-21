@@ -12,7 +12,10 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1", 10);
     const limit = parseInt(searchParams.get("limit") || String(ITEMS_PER_PAGE), 10);
     const categoryId = searchParams.get("category_id");
+    const parentCategoryId = searchParams.get("parent_category_id");
     const regionId = searchParams.get("region_id");
+    const countries = searchParams.get("countries")?.split(",").filter(Boolean) || [];
+    const industries = searchParams.get("industries")?.split(",").filter(Boolean) || [];
     const isVerified = searchParams.get("is_verified");
     const isFeatured = searchParams.get("is_featured");
 
@@ -20,11 +23,11 @@ export async function GET(request: NextRequest) {
 
     let companyIds: string[] | null = null;
 
-    if (categoryId) {
+    if (parentCategoryId) {
       const { data: categoryData } = await supabase
         .from("company_categories")
         .select("company_id")
-        .eq("category_id", categoryId);
+        .eq("category_id", parentCategoryId);
 
       if (categoryData && categoryData.length > 0) {
         companyIds = categoryData.map((item) => item.company_id);
@@ -40,6 +43,102 @@ export async function GET(request: NextRequest) {
             hasPrevPage: false,
           },
         });
+      }
+    }
+
+    if (categoryId) {
+      const { data: categoryData } = await supabase
+        .from("company_categories")
+        .select("company_id")
+        .eq("category_id", categoryId);
+
+      if (categoryData && categoryData.length > 0) {
+        const categoryCompanyIds = categoryData.map((item) => item.company_id);
+        if (companyIds) {
+          companyIds = companyIds.filter((id) => categoryCompanyIds.includes(id));
+        } else {
+          companyIds = categoryCompanyIds;
+        }
+      } else {
+        return NextResponse.json({
+          companies: [],
+          pagination: {
+            page: 1,
+            limit,
+            total: 0,
+            totalPages: 0,
+            hasNextPage: false,
+            hasPrevPage: false,
+          },
+        });
+      }
+    }
+
+    if (industries.length > 0) {
+      const { data: allCompanies } = await supabase
+        .from("companies")
+        .select("id, industries")
+        .eq("is_verified", true);
+
+      if (allCompanies) {
+        const matchingCompanyIds = allCompanies
+          .filter((company) => {
+            if (!company.industries) return false;
+            const companyIndustries = Array.isArray(company.industries)
+              ? company.industries
+              : typeof company.industries === "string"
+              ? JSON.parse(company.industries)
+              : Object.values(company.industries);
+            return industries.some((industry) =>
+              companyIndustries.some((ci: any) =>
+                String(ci).toLowerCase().includes(industry.toLowerCase())
+              )
+            );
+          })
+          .map((c) => c.id);
+
+        if (companyIds) {
+          companyIds = companyIds.filter((id) => matchingCompanyIds.includes(id));
+        } else {
+          companyIds = matchingCompanyIds;
+        }
+      }
+    }
+
+    if (countries.length > 0) {
+      const { data: regions } = await supabase
+        .from("regions")
+        .select("id")
+        .eq("region_type", "country")
+        .in("region_name", countries);
+
+      if (regions && regions.length > 0) {
+        const regionIds = regions.map((r) => r.id);
+        const { data: regionData } = await supabase
+          .from("company_regions")
+          .select("company_id")
+          .in("region_id", regionIds);
+
+        if (regionData && regionData.length > 0) {
+          const countryCompanyIds = regionData.map((item) => item.company_id);
+          if (companyIds) {
+            companyIds = companyIds.filter((id) => countryCompanyIds.includes(id));
+          } else {
+            companyIds = countryCompanyIds;
+          }
+        } else {
+          return NextResponse.json({
+            companies: [],
+            pagination: {
+              page: 1,
+              limit,
+              total: 0,
+              totalPages: 0,
+              hasNextPage: false,
+              hasPrevPage: false,
+            },
+          });
+        }
       }
     }
 
@@ -113,9 +212,57 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
-      query = query.or(
-        `company_name.ilike.%${search}%,intro_title.ilike.%${search}%,intro_content.ilike.%${search}%`
-      );
+      const searchTerm = `%${search}%`;
+      
+      const { data: categoryMatches } = await supabase
+        .from("categories")
+        .select("id")
+        .ilike("category_name", searchTerm)
+        .eq("is_active", true);
+
+      const categoryIds = categoryMatches?.map((c) => c.id) || [];
+
+      let searchCompanyIds: string[] | null = null;
+
+      if (categoryIds.length > 0) {
+        const { data: categoryCompanyData } = await supabase
+          .from("company_categories")
+          .select("company_id")
+          .in("category_id", categoryIds);
+
+        if (categoryCompanyData && categoryCompanyData.length > 0) {
+          searchCompanyIds = categoryCompanyData.map((item) => item.company_id);
+        }
+      }
+
+      const { data: tagMatches } = await supabase
+        .from("company_tags")
+        .select("company_id")
+        .ilike("tag_name", searchTerm);
+
+      const tagCompanyIds = tagMatches?.map((t) => t.company_id) || [];
+
+      const allSearchCompanyIds = new Set<string>();
+      if (searchCompanyIds) {
+        searchCompanyIds.forEach((id) => allSearchCompanyIds.add(id));
+      }
+      tagCompanyIds.forEach((id) => allSearchCompanyIds.add(id));
+
+      const searchConditions = [
+        `company_name.ilike.${searchTerm}`,
+        `intro_title.ilike.${searchTerm}`,
+        `intro_content.ilike.${searchTerm}`,
+        `project_title.ilike.${searchTerm}`,
+        `achievements.ilike.${searchTerm}`,
+        `partners.ilike.${searchTerm}`,
+      ];
+
+      if (allSearchCompanyIds.size > 0) {
+        const idsArray = Array.from(allSearchCompanyIds);
+        searchConditions.push(`id.in.(${idsArray.join(",")})`);
+      }
+
+      query = query.or(searchConditions.join(","));
     }
 
     if (isVerified === "true") {

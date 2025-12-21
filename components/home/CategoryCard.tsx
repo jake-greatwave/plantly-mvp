@@ -2,30 +2,24 @@
 
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
-import { Factory, Cog, Eye, Hammer, Building2, Globe } from 'lucide-react'
+import { Wrench, Building2, Leaf, Settings } from 'lucide-react'
 
-const iconMap: Record<string, any> = {
-  automation: Cog,
-  mold: Hammer,
-  vision: Eye,
-  factory: Building2,
-  manufacturing: Factory,
-  global: Globe,
-}
+const iconMap = [Wrench, Building2, Leaf, Settings]
 
 interface CategoryCardProps {
   id: string
   name: string
   code: string
   iconUrl?: string | null
+  iconIndex?: number
 }
 
-export function CategoryCard({ id, name, code, iconUrl }: CategoryCardProps) {
+export function CategoryCard({ id, name, code, iconUrl, iconIndex }: CategoryCardProps) {
   const router = useRouter()
-  const Icon = iconMap[code] || Factory
+  const Icon = iconIndex !== undefined && iconIndex < iconMap.length ? iconMap[iconIndex] : Wrench
 
   const handleClick = () => {
-    router.push(`/companies?category=${id}`)
+    router.push(`/companies?parent_category_id=${id}`)
   }
 
   return (
@@ -40,7 +34,7 @@ export function CategoryCard({ id, name, code, iconUrl }: CategoryCardProps) {
           <Icon className="w-6 h-6" />
         )}
       </div>
-      <div className="text-gray-900 text-sm font-medium">{name}</div>
+      <div className="text-gray-900 text-base font-medium">{name}</div>
     </Card>
   )
 }

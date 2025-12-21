@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, CheckCircle2, Star } from "lucide-react";
+import { Building2, Star } from "lucide-react";
 import type { Database } from "@/lib/types/database.types";
 
 type Company = Database["public"]["Tables"]["companies"]["Row"] & {
@@ -36,6 +36,7 @@ export function SearchResultCard({ company }: SearchResultCardProps) {
 
   const mainImage =
     company.company_images?.find((img) => img.image_type === "main")?.image_url ||
+    company.company_images?.sort((a, b) => a.display_order - b.display_order)[0]?.image_url ||
     company.logo_url;
 
   const industries = company.industries
@@ -72,6 +73,7 @@ export function SearchResultCard({ company }: SearchResultCardProps) {
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            unoptimized
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
@@ -79,12 +81,6 @@ export function SearchResultCard({ company }: SearchResultCardProps) {
           </div>
         )}
         <div className="absolute top-2 right-2 flex gap-1">
-          {company.is_verified && (
-            <Badge className="bg-blue-600 text-white">
-              <CheckCircle2 className="w-3 h-3 mr-1" />
-              인증
-            </Badge>
-          )}
           {company.is_featured && (
             <Badge className="bg-yellow-500 text-white">
               <Star className="w-3 h-3 mr-1" />
