@@ -36,8 +36,8 @@ export async function GET(request: Request, { params }: RouteParams) {
       .select(`
         *,
         company_images(id, image_url, image_type, display_order),
-        company_categories(category_id),
-        company_regions(region_id)
+        company_categories(category_id, categories(id, parent_id, category_name)),
+        company_regions(region_id, regions(id, region_name, region_type))
       `)
       .eq('id', id)
       .eq('user_id', user.userId)
@@ -51,9 +51,22 @@ export async function GET(request: Request, { params }: RouteParams) {
       )
     }
 
+    const parentCategory = data.company_categories?.find(
+      (cc: any) => cc.categories?.parent_id === null
+    )?.category_id
+
+    const countries = data.company_regions
+      ?.filter((cr: any) => cr.regions?.region_type === 'country')
+      .map((cr: any) => cr.regions?.region_name)
+      .filter(Boolean) || []
+
     return NextResponse.json({
       success: true,
-      data,
+      data: {
+        ...data,
+        parent_category: parentCategory || null,
+        countries,
+      },
     })
   } catch (error) {
     console.error('Company fetch error:', error)
@@ -142,8 +155,18 @@ export async function PUT(request: Request, { params }: RouteParams) {
       await supabase.from('company_images').insert(imageInserts)
     }
 
+    const categoryIds: string[] = []
+
+    if (body.parent_category) {
+      categoryIds.push(body.parent_category)
+    }
+
     if (body.category_ids && body.category_ids.length > 0) {
-      const categoryInserts = body.category_ids.map((catId: string) => ({
+      categoryIds.push(...body.category_ids)
+    }
+
+    if (categoryIds.length > 0) {
+      const categoryInserts = categoryIds.map((catId: string) => ({
         company_id: id,
         category_id: catId,
       }))
@@ -152,13 +175,29 @@ export async function PUT(request: Request, { params }: RouteParams) {
     }
 
     if (body.countries && body.countries.length > 0) {
-      const countryInserts = body.countries.map((country: string) => ({
-        company_id: id,
-        region_id: country,
-        region_type: 'country' as const,
-      }))
+      const { data: regions } = await supabase
+        .from('regions')
+        .select('id, region_name')
+        .eq('region_type', 'country')
+        .in('region_name', body.countries)
 
-      await supabase.from('company_regions').insert(countryInserts)
+      if (regions && regions.length > 0) {
+        const regionMap = new Map(
+          regions.map((r) => [r.region_name, r.id])
+        )
+
+        const countryInserts = body.countries
+          .filter((country: string) => regionMap.has(country))
+          .map((country: string) => ({
+            company_id: id,
+            region_id: regionMap.get(country),
+            region_type: 'country' as const,
+          }))
+
+        if (countryInserts.length > 0) {
+          await supabase.from('company_regions').insert(countryInserts)
+        }
+      }
     }
 
     return NextResponse.json({

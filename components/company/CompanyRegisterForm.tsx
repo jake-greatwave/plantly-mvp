@@ -64,7 +64,14 @@ export function CompanyRegisterForm({ companyId }: CompanyRegisterFormProps) {
       if (response.ok && result.success) {
         const company = result.data
         const imageUrls = company.company_images?.map((img: any) => img.image_url) || []
-        const categoryIds = company.company_categories?.map((cat: any) => cat.category_id) || []
+        
+        const parentCategory = company.company_categories?.find(
+          (cc: any) => cc.categories?.parent_id === null
+        )?.category_id
+        
+        const subCategoryIds = company.company_categories
+          ?.filter((cc: any) => cc.categories?.parent_id !== null)
+          .map((cc: any) => cc.category_id) || []
         
         setFormData({
           company_name: company.company_name,
@@ -75,8 +82,8 @@ export function CompanyRegisterForm({ companyId }: CompanyRegisterFormProps) {
           manager_phone: company.manager_phone || '',
           manager_email: company.manager_email || '',
           website: company.website || '',
-          parent_category: company.parent_category || '',
-          category_ids: categoryIds,
+          parent_category: parentCategory || '',
+          category_ids: subCategoryIds,
           industries: company.industries || [],
           equipment_list: company.equipment || [],
           materials: company.materials || [],
