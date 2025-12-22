@@ -33,6 +33,7 @@ export async function Header() {
           <Navigation 
             isLoggedIn={!!user} 
             userName={user?.name}
+            isAdmin={user?.isAdmin || false}
           />
         </div>
       </div>
