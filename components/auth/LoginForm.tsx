@@ -71,10 +71,10 @@ export function LoginForm() {
         <div className="text-center mb-4">
           <div className="flex justify-center mb-3">
             <Image
-              src="/logo.svg"
+              src="/logo.png"
               alt="플랜틀리 로고"
-              width={120}
-              height={40}
+              width={200}
+              height={67}
               priority
             />
           </div>

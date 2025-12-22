@@ -12,3 +12,4 @@ export function getGradientBackground(color: string): string {
   return `linear-gradient(to bottom, ${color1} 0%, ${color2} 50%, ${color3} 100%), linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)`;
 }
 
+

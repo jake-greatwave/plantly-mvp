@@ -18,3 +18,4 @@ export default async function CompanyDetailPage({ params }: PageProps) {
   );
 }
 
+

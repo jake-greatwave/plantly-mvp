@@ -101,3 +101,4 @@ export const PRIVACY_POLICY = `
 본 방침은 2024년 1월 1일부터 시행됩니다.
 `
 
+

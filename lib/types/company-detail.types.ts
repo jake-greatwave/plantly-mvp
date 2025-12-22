@@ -29,3 +29,4 @@ export type CompanyDetail = Database["public"]["Tables"]["companies"]["Row"] & {
   }>;
 };
 
+
