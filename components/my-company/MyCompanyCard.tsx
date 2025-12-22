@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Pencil, Trash2, Building2 } from 'lucide-react'
+import { Pencil, Trash2, Building2, Eye } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
@@ -21,6 +21,10 @@ interface MyCompanyCardProps {
 export function MyCompanyCard({ id, name, logoUrl, introTitle, isVerified, onDelete }: MyCompanyCardProps) {
   const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
+
+  const handlePreview = () => {
+    router.push(`/companies/${id}`)
+  }
 
   const handleEdit = () => {
     router.push(`/companies/edit/${id}`)
@@ -40,8 +44,8 @@ export function MyCompanyCard({ id, name, logoUrl, introTitle, isVerified, onDel
   }
 
   return (
-    <Card className="group relative p-5 hover:shadow-lg transition-all cursor-pointer bg-white">
-      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+    <Card className="group relative p-5 hover:shadow-lg transition-all bg-white">
+      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 z-10">
         <Button
           size="icon-sm"
           variant="ghost"
@@ -81,7 +85,10 @@ export function MyCompanyCard({ id, name, logoUrl, introTitle, isVerified, onDel
         </AlertDialog>
       </div>
 
-      <div className="flex items-start gap-4">
+      <div 
+        onClick={handlePreview}
+        className="flex items-start gap-4 cursor-pointer"
+      >
         <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
           {logoUrl ? (
             <img src={logoUrl} alt={name} className="w-full h-full object-cover" />
@@ -99,8 +106,20 @@ export function MyCompanyCard({ id, name, logoUrl, introTitle, isVerified, onDel
             )}
           </div>
           {introTitle && (
-            <p className="text-sm text-gray-600 line-clamp-2">{introTitle}</p>
+            <p className="text-sm text-gray-600 line-clamp-2 mb-2">{introTitle}</p>
           )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation()
+              handlePreview()
+            }}
+            className="text-xs"
+          >
+            <Eye className="w-3 h-3 mr-1" />
+            미리보기
+          </Button>
         </div>
       </div>
     </Card>
