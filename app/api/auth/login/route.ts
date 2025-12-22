@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
     const { data: userData, error: userError } = await supabase
       .from("users")
-      .select("id, email, password, name, status, user_grade")
+      .select("id, email, password, name, status, user_grade, is_admin")
       .eq("email", body.email)
       .single();
 
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: "정지된 계정입니다. 관리자에게 문의해주세요.",
+          error: "계정이 비활성화되었습니다. 관리자에게 문의해주세요.",
         },
         { status: 403 }
       );
@@ -59,6 +59,7 @@ export async function POST(request: Request) {
       email: userData.email,
       name: userData.name,
       userGrade: userData.user_grade,
+      isAdmin: userData.is_admin || false,
     };
 
     const accessToken = await generateAccessToken(tokenPayload);

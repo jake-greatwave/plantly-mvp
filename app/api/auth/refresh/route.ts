@@ -28,7 +28,7 @@ export async function POST() {
 
     const { data: userData, error: userError } = await supabase
       .from('users')
-      .select('id, email, name, status, user_grade')
+      .select('id, email, name, status, user_grade, is_admin')
       .eq('id', payload.userId)
       .single()
 
@@ -51,6 +51,7 @@ export async function POST() {
       email: userData.email,
       name: userData.name,
       userGrade: userData.user_grade,
+      isAdmin: userData.is_admin || false,
     }
 
     const newAccessToken = await generateAccessToken(tokenPayload)
@@ -67,6 +68,7 @@ export async function POST() {
       sameSite: 'lax',
       maxAge: 60 * 15,
       path: '/',
+      domain: process.env.NODE_ENV === 'production' ? undefined : undefined,
     })
 
     response.cookies.set('refresh_token', newRefreshToken, {
@@ -75,6 +77,7 @@ export async function POST() {
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 30,
       path: '/',
+      domain: process.env.NODE_ENV === 'production' ? undefined : undefined,
     })
 
     return response

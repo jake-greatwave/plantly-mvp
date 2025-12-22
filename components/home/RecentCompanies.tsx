@@ -4,7 +4,8 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Star } from "lucide-react";
+import { Building2, Star, MapPin } from "lucide-react";
+import { formatAddressShort } from "@/lib/utils/address";
 import type { Database } from "@/lib/types/database.types";
 
 type Company = Database["public"]["Tables"]["companies"]["Row"] & {
@@ -79,6 +80,13 @@ function RecentCompanyCard({ company }: RecentCompanyCardProps) {
           <p className="text-gray-600 text-xs mb-1.5 line-clamp-1 leading-tight overflow-hidden text-ellipsis">
             {company.intro_title}
           </p>
+        )}
+
+        {company.address && (
+          <div className="flex items-center gap-1 mb-1.5 text-[10px] text-gray-500">
+            <MapPin className="w-3 h-3 shrink-0" />
+            <span className="line-clamp-1">{formatAddressShort(company.address)}</span>
+          </div>
         )}
 
         {categories.length > 0 && (

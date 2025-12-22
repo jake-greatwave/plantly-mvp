@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { formatBusinessNumber } from '@/lib/utils/format'
+import { AddressInput } from '@/components/forms/AddressInput'
 import type { CompanyFormData } from '@/lib/types/company-form.types'
 
 interface BasicInfoSectionProps {
@@ -129,6 +130,23 @@ export const BasicInfoSection = memo(function BasicInfoSection({ data, onFieldCh
           placeholder="https://www.company.com"
         />
       </div>
+
+      <AddressInput
+        value={{
+          postcode: data.postcode,
+          address: data.address,
+          addressDetail: data.address_detail,
+        }}
+        onChange={(value) => {
+          onFieldChange('postcode', value.postcode)
+          onFieldChange('address', value.address)
+          onFieldChange('address_detail', value.addressDetail)
+        }}
+        required
+        postcodeLabel="우편번호"
+        addressLabel="주소"
+        addressDetailLabel="상세주소"
+      />
     </div>
   )
 })

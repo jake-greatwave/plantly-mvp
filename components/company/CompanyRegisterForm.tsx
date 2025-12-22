@@ -27,9 +27,10 @@ const DEFAULT_FORM_DATA: Partial<CompanyFormData> = {
 
 interface CompanyRegisterFormProps {
   companyId?: string
+  isAdmin?: boolean
 }
 
-export function CompanyRegisterForm({ companyId }: CompanyRegisterFormProps) {
+export function CompanyRegisterForm({ companyId, isAdmin = false }: CompanyRegisterFormProps) {
   const router = useRouter()
   const [formData, setFormData] = useState<Partial<CompanyFormData>>(DEFAULT_FORM_DATA)
   const [isSaving, setIsSaving] = useState(false)
@@ -73,6 +74,14 @@ export function CompanyRegisterForm({ companyId }: CompanyRegisterFormProps) {
           ?.filter((cc: any) => cc.categories?.parent_id !== null)
           .map((cc: any) => cc.category_id) || []
         
+        const fullAddress = company.address || ''
+        const addressDetail = company.address_detail || ''
+        
+        let mainAddress = fullAddress
+        if (addressDetail && fullAddress.includes(addressDetail)) {
+          mainAddress = fullAddress.replace(addressDetail, '').trim()
+        }
+
         setFormData({
           company_name: company.company_name,
           business_number: company.business_number,
@@ -82,6 +91,9 @@ export function CompanyRegisterForm({ companyId }: CompanyRegisterFormProps) {
           manager_phone: company.manager_phone || '',
           manager_email: company.manager_email || '',
           website: company.website || '',
+          postcode: company.postcode || '',
+          address: mainAddress,
+          address_detail: addressDetail,
           parent_category: parentCategory || '',
           category_ids: subCategoryIds,
           industries: company.industries || [],
@@ -141,6 +153,12 @@ export function CompanyRegisterForm({ companyId }: CompanyRegisterFormProps) {
     if (!formData.ceo_name) {
       return { isValid: false, errorField: '대표자명', section: 'basic' }
     }
+    if (!formData.address) {
+      return { isValid: false, errorField: '주소', section: 'basic' }
+    }
+    if (!formData.address_detail) {
+      return { isValid: false, errorField: '상세주소', section: 'basic' }
+    }
     return { isValid: true }
   }
 
@@ -193,7 +211,7 @@ export function CompanyRegisterForm({ companyId }: CompanyRegisterFormProps) {
 
       toast.success(data.message || '기업 정보가 저장되었습니다.')
       localStorage.removeItem('company_draft')
-      router.push('/my-company')
+      router.push(isAdmin ? '/admin/companies' : '/my-company')
       router.refresh()
     } catch {
       toast.error('서버 오류가 발생했습니다.')
@@ -237,20 +255,22 @@ export function CompanyRegisterForm({ companyId }: CompanyRegisterFormProps) {
         <BrandingSection data={formData} onFieldChange={handleFieldChange} />
       </Card>
 
-      <div className="flex gap-3 mt-6 sticky bottom-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleTempSave}
-          disabled={isSaving}
-          className="flex-1"
-        >
-          임시 저장
-        </Button>
+      <div className="flex gap-3 mt-6 sticky bottom-4 bg-white p-4 rounded-lg border border-gray-200 shadow-lg z-10">
+        {!isAdmin && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleTempSave}
+            disabled={isSaving}
+            className="flex-1"
+          >
+            임시 저장
+          </Button>
+        )}
         <Button
           type="submit"
           disabled={isSaving}
-          className="flex-1 bg-blue-600 hover:bg-blue-700"
+          className={isAdmin ? "w-full bg-blue-600 hover:bg-blue-700" : "flex-1 bg-blue-600 hover:bg-blue-700"}
         >
           {isSaving ? (companyId ? '수정 중...' : '등록 중...') : (companyId ? '수정 완료' : '등록 완료')}
         </Button>

@@ -18,6 +18,7 @@ export type Database = {
           phone: string | null;
           status: "active" | "suspended";
           user_grade: "basic" | "enterprise";
+          is_admin: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -29,6 +30,7 @@ export type Database = {
           phone?: string | null;
           status?: "active" | "suspended";
           user_grade?: "basic" | "enterprise";
+          is_admin?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -40,6 +42,7 @@ export type Database = {
           phone?: string | null;
           status?: "active" | "suspended";
           user_grade?: "basic" | "enterprise";
+          is_admin?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -52,6 +55,7 @@ export type Database = {
           company_name: string;
           ceo_name: string;
           establishment_date: string | null;
+          postcode: string | null;
           address: string | null;
           address_detail: string | null;
           manager_name: string | null;
@@ -88,6 +92,7 @@ export type Database = {
           company_name: string;
           ceo_name: string;
           establishment_date?: string | null;
+          postcode?: string | null;
           address?: string | null;
           address_detail?: string | null;
           manager_name?: string | null;
@@ -124,6 +129,7 @@ export type Database = {
           company_name?: string;
           ceo_name?: string;
           establishment_date?: string | null;
+          postcode?: string | null;
           address?: string | null;
           address_detail?: string | null;
           manager_name?: string | null;
