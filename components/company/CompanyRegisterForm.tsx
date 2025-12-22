@@ -73,6 +73,14 @@ export function CompanyRegisterForm({ companyId }: CompanyRegisterFormProps) {
           ?.filter((cc: any) => cc.categories?.parent_id !== null)
           .map((cc: any) => cc.category_id) || []
         
+        const fullAddress = company.address || ''
+        const addressDetail = company.address_detail || ''
+        
+        let mainAddress = fullAddress
+        if (addressDetail && fullAddress.includes(addressDetail)) {
+          mainAddress = fullAddress.replace(addressDetail, '').trim()
+        }
+
         setFormData({
           company_name: company.company_name,
           business_number: company.business_number,
@@ -82,6 +90,9 @@ export function CompanyRegisterForm({ companyId }: CompanyRegisterFormProps) {
           manager_phone: company.manager_phone || '',
           manager_email: company.manager_email || '',
           website: company.website || '',
+          postcode: company.postcode || '',
+          address: mainAddress,
+          address_detail: addressDetail,
           parent_category: parentCategory || '',
           category_ids: subCategoryIds,
           industries: company.industries || [],
@@ -140,6 +151,12 @@ export function CompanyRegisterForm({ companyId }: CompanyRegisterFormProps) {
     }
     if (!formData.ceo_name) {
       return { isValid: false, errorField: '대표자명', section: 'basic' }
+    }
+    if (!formData.address) {
+      return { isValid: false, errorField: '주소', section: 'basic' }
+    }
+    if (!formData.address_detail) {
+      return { isValid: false, errorField: '상세주소', section: 'basic' }
     }
     return { isValid: true }
   }
@@ -237,7 +254,7 @@ export function CompanyRegisterForm({ companyId }: CompanyRegisterFormProps) {
         <BrandingSection data={formData} onFieldChange={handleFieldChange} />
       </Card>
 
-      <div className="flex gap-3 mt-6 sticky bottom-4">
+      <div className="flex gap-3 mt-6 sticky bottom-4 bg-white p-4 rounded-lg border border-gray-200 shadow-lg z-10">
         <Button
           type="button"
           variant="outline"

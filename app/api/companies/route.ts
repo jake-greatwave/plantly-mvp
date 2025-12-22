@@ -330,6 +330,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const supabase = await createClient();
 
+    const fullAddress = body.address
+      ? body.address_detail
+        ? `${body.address} ${body.address_detail}`
+        : body.address
+      : null;
+
     const { data: company, error } = await supabase
       .from("companies")
       .insert({
@@ -342,6 +348,9 @@ export async function POST(request: NextRequest) {
         manager_phone: body.manager_phone,
         manager_email: body.manager_email,
         website: body.website,
+        postcode: body.postcode || null,
+        address: fullAddress,
+        address_detail: body.address_detail || null,
         equipment: body.equipment_list,
         materials: body.materials,
         trl_level: body.trl_level,

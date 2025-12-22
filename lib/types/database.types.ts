@@ -55,6 +55,7 @@ export type Database = {
           company_name: string;
           ceo_name: string;
           establishment_date: string | null;
+          postcode: string | null;
           address: string | null;
           address_detail: string | null;
           manager_name: string | null;
@@ -91,6 +92,7 @@ export type Database = {
           company_name: string;
           ceo_name: string;
           establishment_date?: string | null;
+          postcode?: string | null;
           address?: string | null;
           address_detail?: string | null;
           manager_name?: string | null;
@@ -127,6 +129,7 @@ export type Database = {
           company_name?: string;
           ceo_name?: string;
           establishment_date?: string | null;
+          postcode?: string | null;
           address?: string | null;
           address_detail?: string | null;
           manager_name?: string | null;

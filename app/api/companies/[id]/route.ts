@@ -34,7 +34,41 @@ export async function GET(request: Request, { params }: RouteParams) {
     const { data, error } = await supabase
       .from('companies')
       .select(`
-        *,
+        id,
+        user_id,
+        business_number,
+        company_name,
+        ceo_name,
+        establishment_date,
+        postcode,
+        address,
+        address_detail,
+        manager_name,
+        manager_position,
+        manager_phone,
+        manager_email,
+        website,
+        logo_url,
+        intro_title,
+        intro_content,
+        equipment,
+        materials,
+        trl_level,
+        certifications,
+        industries,
+        project_title,
+        achievements,
+        partners,
+        video_url,
+        lead_time,
+        as_info,
+        pricing_type,
+        brand_color,
+        is_verified,
+        is_featured,
+        view_count,
+        created_at,
+        updated_at,
         company_images(id, image_url, image_type, display_order),
         company_categories(category_id, categories(id, parent_id, category_name)),
         company_regions(region_id, regions(id, region_name, region_type))
@@ -102,6 +136,12 @@ export async function PUT(request: Request, { params }: RouteParams) {
     const body = await request.json()
     const supabase = await createClient()
 
+    const fullAddress = body.address
+      ? body.address_detail
+        ? `${body.address} ${body.address_detail}`
+        : body.address
+      : null
+
     const { data: company, error } = await supabase
       .from('companies')
       .update({
@@ -113,6 +153,9 @@ export async function PUT(request: Request, { params }: RouteParams) {
         manager_phone: body.manager_phone,
         manager_email: body.manager_email,
         website: body.website,
+        postcode: body.postcode || null,
+        address: fullAddress,
+        address_detail: body.address_detail || null,
         equipment: body.equipment_list,
         materials: body.materials,
         trl_level: body.trl_level,
