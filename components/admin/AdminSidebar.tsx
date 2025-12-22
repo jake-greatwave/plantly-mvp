@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, Settings } from "lucide-react";
+import { Users, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const menuItems = [
@@ -10,6 +10,11 @@ const menuItems = [
     href: "/admin",
     label: "사용자 관리",
     icon: Users,
+  },
+  {
+    href: "/admin/companies",
+    label: "기업 정보 관리",
+    icon: Building2,
   },
 ];
 

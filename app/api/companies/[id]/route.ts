@@ -31,7 +31,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     const supabase = await createClient()
 
-    const { data, error } = await supabase
+    let query = supabase
       .from('companies')
       .select(`
         id,
@@ -74,8 +74,12 @@ export async function GET(request: Request, { params }: RouteParams) {
         company_regions(region_id, regions(id, region_name, region_type))
       `)
       .eq('id', id)
-      .eq('user_id', user.userId)
-      .single()
+
+    if (!user.isAdmin) {
+      query = query.eq('user_id', user.userId)
+    }
+
+    const { data, error } = await query.single()
 
     if (error) {
       console.error('Company fetch error:', error)
@@ -142,7 +146,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
         : body.address
       : null
 
-    const { data: company, error } = await supabase
+    let updateQuery = supabase
       .from('companies')
       .update({
         company_name: body.company_name,
@@ -171,9 +175,12 @@ export async function PUT(request: Request, { params }: RouteParams) {
         brand_color: body.brand_color,
       })
       .eq('id', id)
-      .eq('user_id', user.userId)
-      .select()
-      .single()
+
+    if (!user.isAdmin) {
+      updateQuery = updateQuery.eq('user_id', user.userId)
+    }
+
+    const { data: company, error } = await updateQuery.select().single()
 
     if (error) {
       console.error('Company update error:', error)

@@ -68,6 +68,7 @@ export async function POST() {
       sameSite: 'lax',
       maxAge: 60 * 15,
       path: '/',
+      domain: process.env.NODE_ENV === 'production' ? undefined : undefined,
     })
 
     response.cookies.set('refresh_token', newRefreshToken, {
@@ -76,6 +77,7 @@ export async function POST() {
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 30,
       path: '/',
+      domain: process.env.NODE_ENV === 'production' ? undefined : undefined,
     })
 
     return response

@@ -27,9 +27,10 @@ const DEFAULT_FORM_DATA: Partial<CompanyFormData> = {
 
 interface CompanyRegisterFormProps {
   companyId?: string
+  isAdmin?: boolean
 }
 
-export function CompanyRegisterForm({ companyId }: CompanyRegisterFormProps) {
+export function CompanyRegisterForm({ companyId, isAdmin = false }: CompanyRegisterFormProps) {
   const router = useRouter()
   const [formData, setFormData] = useState<Partial<CompanyFormData>>(DEFAULT_FORM_DATA)
   const [isSaving, setIsSaving] = useState(false)
@@ -210,7 +211,7 @@ export function CompanyRegisterForm({ companyId }: CompanyRegisterFormProps) {
 
       toast.success(data.message || '기업 정보가 저장되었습니다.')
       localStorage.removeItem('company_draft')
-      router.push('/my-company')
+      router.push(isAdmin ? '/admin/companies' : '/my-company')
       router.refresh()
     } catch {
       toast.error('서버 오류가 발생했습니다.')
@@ -255,19 +256,21 @@ export function CompanyRegisterForm({ companyId }: CompanyRegisterFormProps) {
       </Card>
 
       <div className="flex gap-3 mt-6 sticky bottom-4 bg-white p-4 rounded-lg border border-gray-200 shadow-lg z-10">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleTempSave}
-          disabled={isSaving}
-          className="flex-1"
-        >
-          임시 저장
-        </Button>
+        {!isAdmin && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleTempSave}
+            disabled={isSaving}
+            className="flex-1"
+          >
+            임시 저장
+          </Button>
+        )}
         <Button
           type="submit"
           disabled={isSaving}
-          className="flex-1 bg-blue-600 hover:bg-blue-700"
+          className={isAdmin ? "w-full bg-blue-600 hover:bg-blue-700" : "flex-1 bg-blue-600 hover:bg-blue-700"}
         >
           {isSaving ? (companyId ? '수정 중...' : '등록 중...') : (companyId ? '수정 완료' : '등록 완료')}
         </Button>
