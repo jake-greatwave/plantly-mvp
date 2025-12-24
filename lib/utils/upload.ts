@@ -30,3 +30,5 @@ export async function uploadMultipleFiles(files: File[], bucket: string = 'compa
   return results.filter((url): url is string => url !== null)
 }
 
+
+

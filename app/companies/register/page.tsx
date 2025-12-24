@@ -4,3 +4,5 @@ export default function CompanyRegisterPage() {
   return <CompanyRegisterForm />
 }
 
+
+

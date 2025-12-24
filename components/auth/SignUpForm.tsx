@@ -98,10 +98,10 @@ export function SignUpForm() {
         <div className="text-center mb-4">
           <div className="flex justify-center mb-2">
             <Image
-              src="/logo.svg"
+              src="/logo.png"
               alt="플랜틀리 로고"
-              width={120}
-              height={40}
+              width={200}
+              height={67}
               priority
             />
           </div>
@@ -296,4 +296,5 @@ export function SignUpForm() {
     </div>
   )
 }
+
 

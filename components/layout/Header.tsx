@@ -22,10 +22,10 @@ export async function Header() {
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center">
             <Image
-              src="/logo.svg"
+              src="/logo.png"
               alt="플랜틀리 로고"
-              width={100}
-              height={33}
+              width={180}
+              height={60}
               priority
             />
           </Link>
