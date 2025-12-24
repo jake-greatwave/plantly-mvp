@@ -17,8 +17,9 @@ export type Database = {
           name: string;
           phone: string | null;
           status: "active" | "suspended";
-          user_grade: "basic" | "enterprise";
+          user_grade: "basic" | "enterprise" | "enterprise_trial";
           is_admin: boolean;
+          trial_end_date: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -29,8 +30,9 @@ export type Database = {
           name: string;
           phone?: string | null;
           status?: "active" | "suspended";
-          user_grade?: "basic" | "enterprise";
+          user_grade?: "basic" | "enterprise" | "enterprise_trial";
           is_admin?: boolean;
+          trial_end_date?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -41,10 +43,43 @@ export type Database = {
           name?: string;
           phone?: string | null;
           status?: "active" | "suspended";
-          user_grade?: "basic" | "enterprise";
+          user_grade?: "basic" | "enterprise" | "enterprise_trial";
           is_admin?: boolean;
+          trial_end_date?: string | null;
           created_at?: string;
           updated_at?: string;
+        };
+      };
+      upgrade_surveys: {
+        Row: {
+          id: string;
+          user_id: string;
+          feature_used: string | null;
+          q1_needs: "very_important" | "normal" | "not_important";
+          q2_price: "very_cheap" | "reasonable" | "somewhat_expensive" | "too_expensive";
+          q3_wtp: "basic" | "standard" | "premium" | "enterprise";
+          q3_etc: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          feature_used?: string | null;
+          q1_needs: "very_important" | "normal" | "not_important";
+          q2_price: "very_cheap" | "reasonable" | "somewhat_expensive" | "too_expensive";
+          q3_wtp: "basic" | "standard" | "premium" | "enterprise";
+          q3_etc?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          feature_used?: string | null;
+          q1_needs?: "very_important" | "normal" | "not_important";
+          q2_price?: "very_cheap" | "reasonable" | "somewhat_expensive" | "too_expensive";
+          q3_wtp?: "basic" | "standard" | "premium" | "enterprise";
+          q3_etc?: string | null;
+          created_at?: string;
         };
       };
       companies: {

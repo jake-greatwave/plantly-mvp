@@ -29,6 +29,15 @@ export const GRADE_LIMITS: Record<UserGrade, GradeLimits> = {
     canBeFeatured: true,
     priority: 2,
   },
+  enterprise_trial: {
+    maxCategoryTags: 20,
+    maxImages: 10,
+    canUploadImages: true,
+    canUploadVideo: true,
+    canCustomizeColor: true,
+    canBeFeatured: true,
+    priority: 2,
+  },
 };
 
 export function getGradeLimits(grade: UserGrade): GradeLimits {
@@ -95,4 +104,16 @@ export function getEffectiveLimits(
     };
   }
   return getGradeLimits(grade);
+}
+
+export function isEnterpriseGrade(grade: UserGrade): boolean {
+  return grade === "enterprise" || grade === "enterprise_trial";
+}
+
+export function shouldShowUpgradePrompt(
+  grade: UserGrade,
+  isAdmin: boolean
+): boolean {
+  if (isAdmin) return false;
+  return grade === "basic";
 }

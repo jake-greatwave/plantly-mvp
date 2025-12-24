@@ -28,18 +28,36 @@ const DEFAULT_FORM_DATA: Partial<CompanyFormData> = {
 interface CompanyRegisterFormProps {
   companyId?: string
   isAdmin?: boolean
-  userGrade?: 'basic' | 'enterprise'
+  userGrade?: 'basic' | 'enterprise' | 'enterprise_trial'
 }
 
-export function CompanyRegisterForm({ companyId, isAdmin = false, userGrade = 'basic' }: CompanyRegisterFormProps) {
+export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false, userGrade: initialUserGrade = 'basic' }: CompanyRegisterFormProps) {
   const router = useRouter()
   const [formData, setFormData] = useState<Partial<CompanyFormData>>(DEFAULT_FORM_DATA)
   const [isSaving, setIsSaving] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
   const [isBusinessNumberVerified, setIsBusinessNumberVerified] = useState(false)
+  const [userGrade, setUserGrade] = useState<'basic' | 'enterprise' | 'enterprise_trial'>(initialUserGrade as 'basic' | 'enterprise' | 'enterprise_trial')
+  const [isAdmin, setIsAdmin] = useState(initialIsAdmin)
   
   const basicInfoRef = useRef<HTMLDivElement>(null)
   const categoryRef = useRef<HTMLDivElement>(null)
+
+  const refreshUserInfo = async () => {
+    try {
+      const response = await fetch('/api/auth/me')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.user) {
+          const newGrade = data.user.userGrade as 'basic' | 'enterprise' | 'enterprise_trial'
+          setUserGrade(newGrade || 'basic')
+          setIsAdmin(data.user.isAdmin || false)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to refresh user info:', error)
+    }
+  }
 
   useEffect(() => {
     if (companyId) {
@@ -58,6 +76,11 @@ export function CompanyRegisterForm({ companyId, isAdmin = false, userGrade = 'b
       setIsLoaded(true)
     }
   }, [companyId])
+
+  useEffect(() => {
+    setUserGrade(initialUserGrade as 'basic' | 'enterprise' | 'enterprise_trial')
+    setIsAdmin(initialIsAdmin)
+  }, [initialUserGrade, initialIsAdmin])
 
   const loadCompanyData = async (id: string) => {
     try {
@@ -254,6 +277,16 @@ export function CompanyRegisterForm({ companyId, isAdmin = false, userGrade = 'b
 
       if (!response.ok) {
         toast.error(data.error || '저장에 실패했습니다.')
+        
+        if (data.error?.includes('사업자등록번호')) {
+          if (basicInfoRef.current) {
+            basicInfoRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            setTimeout(() => {
+              window.scrollBy(0, -100)
+            }, 300)
+          }
+        }
+        
         return
       }
 
@@ -291,16 +324,35 @@ export function CompanyRegisterForm({ companyId, isAdmin = false, userGrade = 'b
         </div>
         <Separator />
         <div ref={categoryRef}>
-          <CategorySection data={formData} onFieldChange={handleFieldChange} onFieldsChange={handleFieldsChange} userGrade={userGrade} isAdmin={isAdmin} />
+          <CategorySection 
+            data={formData} 
+            onFieldChange={handleFieldChange} 
+            onFieldsChange={handleFieldsChange} 
+            userGrade={userGrade} 
+            isAdmin={isAdmin}
+            onUpgradeSuccess={refreshUserInfo}
+          />
         </div>
         <Separator />
         <TechnicalSpecSection data={formData} onFieldChange={handleFieldChange} />
         <Separator />
-        <ReferenceSection data={formData} onFieldChange={handleFieldChange} userGrade={userGrade} isAdmin={isAdmin} />
+        <ReferenceSection 
+          data={formData} 
+          onFieldChange={handleFieldChange} 
+          userGrade={userGrade} 
+          isAdmin={isAdmin}
+          onUpgradeSuccess={refreshUserInfo}
+        />
         <Separator />
         <TradingConditionSection data={formData} onFieldChange={handleFieldChange} />
         <Separator />
-        <BrandingSection data={formData} onFieldChange={handleFieldChange} userGrade={userGrade} isAdmin={isAdmin} />
+        <BrandingSection 
+          data={formData} 
+          onFieldChange={handleFieldChange} 
+          userGrade={userGrade} 
+          isAdmin={isAdmin}
+          onUpgradeSuccess={refreshUserInfo}
+        />
       </Card>
 
       <div className="flex gap-3 mt-6 sticky bottom-4 bg-white p-4 rounded-lg border border-gray-200 shadow-lg z-10">

@@ -7,7 +7,7 @@ import { MultiSelectField } from '@/components/forms/MultiSelectField'
 import { UpgradePrompt } from '@/components/ui/upgrade-prompt'
 import { getCategories } from '@/lib/actions/categories'
 import { INDUSTRIES } from '@/lib/types/company-form.types'
-import { getGradeLimits, canAddCategoryTag, getEffectiveLimits } from '@/lib/utils/grade-limits'
+import { getGradeLimits, canAddCategoryTag, getEffectiveLimits, isEnterpriseGrade } from '@/lib/utils/grade-limits'
 import type { CompanyFormData } from '@/lib/types/company-form.types'
 import type { UserGrade } from '@/lib/types/auth.types'
 import type { Database } from '@/lib/types/database.types'
@@ -20,9 +20,10 @@ interface CategorySectionProps {
   onFieldsChange: (fields: Partial<CompanyFormData>) => void
   userGrade?: UserGrade
   isAdmin?: boolean
+  onUpgradeSuccess?: () => void
 }
 
-export const CategorySection = memo(function CategorySection({ data, onFieldChange, onFieldsChange, userGrade = 'basic', isAdmin = false }: CategorySectionProps) {
+export const CategorySection = memo(function CategorySection({ data, onFieldChange, onFieldsChange, userGrade = 'basic', isAdmin = false, onUpgradeSuccess }: CategorySectionProps) {
   const [parentCategories, setParentCategories] = useState<Category[]>([])
   const [childCategories, setChildCategories] = useState<Category[]>([])
 
@@ -48,8 +49,9 @@ export const CategorySection = memo(function CategorySection({ data, onFieldChan
 
   const categoryIds = data.category_ids || []
   const limits = getEffectiveLimits(userGrade, isAdmin)
-  const canAddMore = canAddCategoryTag(categoryIds.length, userGrade, isAdmin)
-  const disabledOptions = canAddMore || isAdmin ? [] : childCategories.map(c => c.id).filter(id => !categoryIds.includes(id))
+  const isEnterprise = isEnterpriseGrade(userGrade)
+  const canAddMore = canAddCategoryTag(categoryIds.length, userGrade, isAdmin) || isEnterprise
+  const disabledOptions = canAddMore || isAdmin || isEnterprise ? [] : childCategories.map(c => c.id).filter(id => !categoryIds.includes(id))
 
   return (
     <div className="space-y-5">
@@ -80,7 +82,7 @@ export const CategorySection = memo(function CategorySection({ data, onFieldChan
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label>세부 공정 태그</Label>
-            {!isAdmin && userGrade === 'basic' && limits.maxCategoryTags !== Infinity && (
+            {!isAdmin && !isEnterprise && userGrade === 'basic' && limits.maxCategoryTags !== Infinity && (
               <span className="text-xs text-gray-500">
                 {categoryIds.length}/{limits.maxCategoryTags}개 선택됨
               </span>
@@ -94,7 +96,7 @@ export const CategorySection = memo(function CategorySection({ data, onFieldChan
             disabledOptions={disabledOptions}
           />
           {!canAddMore && !isAdmin && userGrade === 'basic' && (
-            <UpgradePrompt feature="세부 공정 태그" />
+            <UpgradePrompt feature="세부 공정 태그" onUpgradeSuccess={onUpgradeSuccess} />
           )}
         </div>
       )}

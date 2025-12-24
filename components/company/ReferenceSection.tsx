@@ -15,9 +15,10 @@ interface ReferenceSectionProps {
   onFieldChange: (field: keyof CompanyFormData, value: any) => void
   userGrade?: UserGrade
   isAdmin?: boolean
+  onUpgradeSuccess?: () => void
 }
 
-export const ReferenceSection = memo(function ReferenceSection({ data, onFieldChange, userGrade = 'basic', isAdmin = false }: ReferenceSectionProps) {
+export const ReferenceSection = memo(function ReferenceSection({ data, onFieldChange, userGrade = 'basic', isAdmin = false, onUpgradeSuccess }: ReferenceSectionProps) {
   const limits = getEffectiveLimits(userGrade, isAdmin)
 
   return (
@@ -59,14 +60,14 @@ export const ReferenceSection = memo(function ReferenceSection({ data, onFieldCh
 
       <div className="space-y-2">
         <Label>상세 이미지</Label>
-        {limits.canUploadImages || isAdmin ? (
+        {limits.canUploadImages || isAdmin || userGrade === 'enterprise_trial' ? (
           <FileUploadField
             value={data.images || []}
             onChange={(value) => onFieldChange('images', value)}
             maxFiles={isAdmin ? Infinity : limits.maxImages}
           />
         ) : (
-          <UpgradePrompt feature="상세 이미지" variant="overlay">
+          <UpgradePrompt feature="상세 이미지" variant="overlay" onUpgradeSuccess={onUpgradeSuccess}>
             <FileUploadField
               value={data.images || []}
               onChange={(value) => onFieldChange('images', value)}
@@ -79,7 +80,7 @@ export const ReferenceSection = memo(function ReferenceSection({ data, onFieldCh
 
       <div className="space-y-2">
         <Label htmlFor="video_url">동영상 링크</Label>
-        {limits.canUploadVideo || isAdmin ? (
+        {limits.canUploadVideo || isAdmin || userGrade === 'enterprise_trial' ? (
           <Input
             id="video_url"
             type="url"
@@ -88,7 +89,7 @@ export const ReferenceSection = memo(function ReferenceSection({ data, onFieldCh
             placeholder="https://www.youtube.com/watch?v=..."
           />
         ) : (
-          <UpgradePrompt feature="동영상 링크" variant="overlay">
+          <UpgradePrompt feature="동영상 링크" variant="overlay" onUpgradeSuccess={onUpgradeSuccess}>
             <Input
               id="video_url"
               type="url"

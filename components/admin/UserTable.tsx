@@ -19,7 +19,7 @@ interface UserTableProps {
     updates: {
       is_admin?: boolean;
       status?: "active" | "suspended";
-      user_grade?: "basic" | "enterprise";
+      user_grade?: "basic" | "enterprise" | "enterprise_trial";
     },
     optimisticUpdate: (user: User) => User
   ) => Promise<void>;
@@ -90,7 +90,7 @@ export function UserTable({ users, onUserUpdate }: UserTableProps) {
 
   const handleGradeChange = async (
     user: User,
-    newGrade: "basic" | "enterprise"
+    newGrade: "basic" | "enterprise" | "enterprise_trial"
   ) => {
     if (updatingIds.has(user.id) || user.user_grade === newGrade) return;
 
@@ -184,7 +184,7 @@ export function UserTable({ users, onUserUpdate }: UserTableProps) {
                       onValueChange={(value) =>
                         handleGradeChange(
                           user,
-                          value as "basic" | "enterprise"
+                          value as "basic" | "enterprise" | "enterprise_trial"
                         )
                       }
                       disabled={updatingIds.has(user.id)}
@@ -195,6 +195,7 @@ export function UserTable({ users, onUserUpdate }: UserTableProps) {
                       <SelectContent>
                         <SelectItem value="basic">basic</SelectItem>
                         <SelectItem value="enterprise">enterprise</SelectItem>
+                        <SelectItem value="enterprise_trial">enterprise_trial</SelectItem>
                       </SelectContent>
                     </Select>
                   </td>

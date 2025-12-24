@@ -4,7 +4,7 @@ import { memo, useEffect } from 'react'
 import { Label } from '@/components/ui/label'
 import { ColorPickerField } from '@/components/forms/ColorPickerField'
 import { UpgradePrompt } from '@/components/ui/upgrade-prompt'
-import { getEffectiveLimits } from '@/lib/utils/grade-limits'
+import { getEffectiveLimits, isEnterpriseGrade } from '@/lib/utils/grade-limits'
 import type { CompanyFormData } from '@/lib/types/company-form.types'
 import type { UserGrade } from '@/lib/types/auth.types'
 
@@ -15,11 +15,12 @@ interface BrandingSectionProps {
   onFieldChange: (field: keyof CompanyFormData, value: any) => void
   userGrade?: UserGrade
   isAdmin?: boolean
+  onUpgradeSuccess?: () => void
 }
 
-export const BrandingSection = memo(function BrandingSection({ data, onFieldChange, userGrade = 'basic', isAdmin = false }: BrandingSectionProps) {
+export const BrandingSection = memo(function BrandingSection({ data, onFieldChange, userGrade = 'basic', isAdmin = false, onUpgradeSuccess }: BrandingSectionProps) {
   const limits = getEffectiveLimits(userGrade, isAdmin)
-  const canCustomizeColor = limits.canCustomizeColor || isAdmin
+  const canCustomizeColor = limits.canCustomizeColor || isAdmin || isEnterpriseGrade(userGrade)
   const currentColor = data.brand_color || (canCustomizeColor ? '#3B82F6' : BASIC_COLOR)
 
   useEffect(() => {
@@ -46,7 +47,7 @@ export const BrandingSection = memo(function BrandingSection({ data, onFieldChan
           />
         ) : (
           <div className="space-y-2">
-            <UpgradePrompt feature="대표 색상 커스터마이징" variant="inline" />
+            <UpgradePrompt feature="대표 색상 커스터마이징" variant="inline" onUpgradeSuccess={onUpgradeSuccess} />
             <ColorPickerField
               value={BASIC_COLOR}
               onChange={(value) => onFieldChange('brand_color', BASIC_COLOR)}
