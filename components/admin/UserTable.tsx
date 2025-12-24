@@ -193,8 +193,8 @@ export function UserTable({ users, onUserUpdate }: UserTableProps) {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="basic">기본</SelectItem>
-                        <SelectItem value="enterprise">기업</SelectItem>
+                        <SelectItem value="basic">basic</SelectItem>
+                        <SelectItem value="enterprise">enterprise</SelectItem>
                       </SelectContent>
                     </Select>
                   </td>
