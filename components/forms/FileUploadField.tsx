@@ -11,15 +11,18 @@ interface FileUploadFieldProps {
   onChange: (urls: string[]) => void
   maxFiles?: number
   accept?: string
+  disabled?: boolean
 }
 
-export function FileUploadField({ value, onChange, maxFiles = 10, accept = 'image/*' }: FileUploadFieldProps) {
+export function FileUploadField({ value, onChange, maxFiles = 10, accept = 'image/*', disabled = false }: FileUploadFieldProps) {
   const [uploading, setUploading] = useState(false)
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return
+    
     const files = Array.from(e.target.files || [])
     
-    if (files.length + value.length > maxFiles) {
+    if (maxFiles !== Infinity && files.length + value.length > maxFiles) {
       toast.error(`최대 ${maxFiles}개까지 업로드 가능합니다.`)
       return
     }
@@ -56,7 +59,7 @@ export function FileUploadField({ value, onChange, maxFiles = 10, accept = 'imag
           type="button"
           variant="outline"
           onClick={() => document.getElementById('file-upload')?.click()}
-          disabled={uploading || value.length >= maxFiles}
+          disabled={disabled || uploading || (maxFiles !== Infinity && value.length >= maxFiles)}
           className="w-full"
         >
           {uploading ? (
@@ -67,7 +70,7 @@ export function FileUploadField({ value, onChange, maxFiles = 10, accept = 'imag
           ) : (
             <>
               <Upload className="w-4 h-4 mr-2" />
-              파일 선택 ({value.length}/{maxFiles})
+              파일 선택 {maxFiles === Infinity ? `(${value.length})` : `(${value.length}/${maxFiles})`}
             </>
           )}
         </Button>
@@ -96,6 +99,7 @@ export function FileUploadField({ value, onChange, maxFiles = 10, accept = 'imag
     </div>
   )
 }
+
 
 
 

@@ -28,16 +28,36 @@ const DEFAULT_FORM_DATA: Partial<CompanyFormData> = {
 interface CompanyRegisterFormProps {
   companyId?: string
   isAdmin?: boolean
+  userGrade?: 'basic' | 'enterprise' | 'enterprise_trial'
 }
 
-export function CompanyRegisterForm({ companyId, isAdmin = false }: CompanyRegisterFormProps) {
+export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false, userGrade: initialUserGrade = 'basic' }: CompanyRegisterFormProps) {
   const router = useRouter()
   const [formData, setFormData] = useState<Partial<CompanyFormData>>(DEFAULT_FORM_DATA)
   const [isSaving, setIsSaving] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
+  const [isBusinessNumberVerified, setIsBusinessNumberVerified] = useState(false)
+  const [userGrade, setUserGrade] = useState<'basic' | 'enterprise' | 'enterprise_trial'>(initialUserGrade as 'basic' | 'enterprise' | 'enterprise_trial')
+  const [isAdmin, setIsAdmin] = useState(initialIsAdmin)
   
   const basicInfoRef = useRef<HTMLDivElement>(null)
   const categoryRef = useRef<HTMLDivElement>(null)
+
+  const refreshUserInfo = async () => {
+    try {
+      const response = await fetch('/api/auth/me')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.user) {
+          const newGrade = data.user.userGrade as 'basic' | 'enterprise' | 'enterprise_trial'
+          setUserGrade(newGrade || 'basic')
+          setIsAdmin(data.user.isAdmin || false)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to refresh user info:', error)
+    }
+  }
 
   useEffect(() => {
     if (companyId) {
@@ -56,6 +76,11 @@ export function CompanyRegisterForm({ companyId, isAdmin = false }: CompanyRegis
       setIsLoaded(true)
     }
   }, [companyId])
+
+  useEffect(() => {
+    setUserGrade(initialUserGrade as 'basic' | 'enterprise' | 'enterprise_trial')
+    setIsAdmin(initialIsAdmin)
+  }, [initialUserGrade, initialIsAdmin])
 
   const loadCompanyData = async (id: string) => {
     try {
@@ -125,6 +150,9 @@ export function CompanyRegisterForm({ companyId, isAdmin = false }: CompanyRegis
 
   const handleFieldChange = useCallback((field: keyof CompanyFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+    if (field === 'business_number') {
+      setIsBusinessNumberVerified(false)
+    }
   }, [])
 
   const handleFieldsChange = useCallback((fields: Partial<CompanyFormData>) => {
@@ -189,6 +217,49 @@ export function CompanyRegisterForm({ companyId, isAdmin = false }: CompanyRegis
       return
     }
 
+    if (!companyId && formData.business_number) {
+      const cleanedNumber = formData.business_number.replace(/-/g, '')
+      if (cleanedNumber.length === 10 && /^\d{10}$/.test(cleanedNumber)) {
+        try {
+          const verifyResponse = await fetch('/api/business/verify', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              businessNumber: cleanedNumber,
+            }),
+          })
+
+          const verifyResult = await verifyResponse.json()
+
+          if (!verifyResult.success) {
+            toast.error(verifyResult.error || '사업자등록번호 검증에 실패했습니다. 유효한 사업자등록번호를 입력해주세요.')
+            if (basicInfoRef.current) {
+              basicInfoRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              setTimeout(() => {
+                window.scrollBy(0, -100)
+              }, 300)
+            }
+            return
+          }
+        } catch (error) {
+          console.error('Business verification error:', error)
+          toast.error('사업자등록번호 검증 중 오류가 발생했습니다.')
+          return
+        }
+      } else {
+        toast.error('사업자등록번호는 10자리 숫자여야 합니다.')
+        if (basicInfoRef.current) {
+          basicInfoRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          setTimeout(() => {
+            window.scrollBy(0, -100)
+          }, 300)
+        }
+        return
+      }
+    }
+
     setIsSaving(true)
     try {
       const url = companyId ? `/api/companies/${companyId}` : '/api/companies'
@@ -206,6 +277,16 @@ export function CompanyRegisterForm({ companyId, isAdmin = false }: CompanyRegis
 
       if (!response.ok) {
         toast.error(data.error || '저장에 실패했습니다.')
+        
+        if (data.error?.includes('사업자등록번호')) {
+          if (basicInfoRef.current) {
+            basicInfoRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            setTimeout(() => {
+              window.scrollBy(0, -100)
+            }, 300)
+          }
+        }
+        
         return
       }
 
@@ -239,20 +320,39 @@ export function CompanyRegisterForm({ companyId, isAdmin = false }: CompanyRegis
 
       <Card className="p-6 space-y-8">
         <div ref={basicInfoRef}>
-          <BasicInfoSection data={formData} onFieldChange={handleFieldChange} />
+          <BasicInfoSection data={formData} onFieldChange={handleFieldChange} onVerificationChange={setIsBusinessNumberVerified} />
         </div>
         <Separator />
         <div ref={categoryRef}>
-          <CategorySection data={formData} onFieldChange={handleFieldChange} onFieldsChange={handleFieldsChange} />
+          <CategorySection 
+            data={formData} 
+            onFieldChange={handleFieldChange} 
+            onFieldsChange={handleFieldsChange} 
+            userGrade={userGrade} 
+            isAdmin={isAdmin}
+            onUpgradeSuccess={refreshUserInfo}
+          />
         </div>
         <Separator />
         <TechnicalSpecSection data={formData} onFieldChange={handleFieldChange} />
         <Separator />
-        <ReferenceSection data={formData} onFieldChange={handleFieldChange} />
+        <ReferenceSection 
+          data={formData} 
+          onFieldChange={handleFieldChange} 
+          userGrade={userGrade} 
+          isAdmin={isAdmin}
+          onUpgradeSuccess={refreshUserInfo}
+        />
         <Separator />
         <TradingConditionSection data={formData} onFieldChange={handleFieldChange} />
         <Separator />
-        <BrandingSection data={formData} onFieldChange={handleFieldChange} />
+        <BrandingSection 
+          data={formData} 
+          onFieldChange={handleFieldChange} 
+          userGrade={userGrade} 
+          isAdmin={isAdmin}
+          onUpgradeSuccess={refreshUserInfo}
+        />
       </Card>
 
       <div className="flex gap-3 mt-6 sticky bottom-4 bg-white p-4 rounded-lg border border-gray-200 shadow-lg z-10">

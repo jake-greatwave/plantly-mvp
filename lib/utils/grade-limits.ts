@@ -1,53 +1,119 @@
-import type { UserGrade } from '@/lib/types/auth.types'
+import type { UserGrade } from "@/lib/types/auth.types";
 
 export interface GradeLimits {
-  maxImages: number
-  maxTags: number
-  canBeFeatured: boolean
-  priority: number
+  maxCategoryTags: number;
+  maxImages: number;
+  canUploadImages: boolean;
+  canUploadVideo: boolean;
+  canCustomizeColor: boolean;
+  canBeFeatured: boolean;
+  priority: number;
 }
 
 export const GRADE_LIMITS: Record<UserGrade, GradeLimits> = {
   basic: {
-    maxImages: 3,
-    maxTags: 3,
+    maxCategoryTags: 2,
+    maxImages: 0,
+    canUploadImages: false,
+    canUploadVideo: false,
+    canCustomizeColor: false,
     canBeFeatured: false,
     priority: 1,
   },
   enterprise: {
+    maxCategoryTags: 20,
     maxImages: 10,
-    maxTags: Infinity,
+    canUploadImages: true,
+    canUploadVideo: true,
+    canCustomizeColor: true,
     canBeFeatured: true,
     priority: 2,
   },
-}
+  enterprise_trial: {
+    maxCategoryTags: 20,
+    maxImages: 10,
+    canUploadImages: true,
+    canUploadVideo: true,
+    canCustomizeColor: true,
+    canBeFeatured: true,
+    priority: 2,
+  },
+};
 
 export function getGradeLimits(grade: UserGrade): GradeLimits {
-  return GRADE_LIMITS[grade]
+  return GRADE_LIMITS[grade];
 }
 
-export function canAddImage(currentCount: number, grade: UserGrade): boolean {
-  const limits = getGradeLimits(grade)
-  return currentCount < limits.maxImages
+export function canAddCategoryTag(
+  currentCount: number,
+  grade: UserGrade,
+  isAdmin: boolean = false
+): boolean {
+  if (isAdmin) return true;
+  const limits = getGradeLimits(grade);
+  return currentCount < limits.maxCategoryTags;
 }
 
-export function canAddTag(currentCount: number, grade: UserGrade): boolean {
-  const limits = getGradeLimits(grade)
-  return currentCount < limits.maxTags
+export function canAddImage(
+  currentCount: number,
+  grade: UserGrade,
+  isAdmin: boolean = false
+): boolean {
+  if (isAdmin) return true;
+  const limits = getGradeLimits(grade);
+  if (!limits.canUploadImages) return false;
+  return currentCount < limits.maxImages;
 }
 
-export function getRemainingImages(currentCount: number, grade: UserGrade): number {
-  const limits = getGradeLimits(grade)
-  return Math.max(0, limits.maxImages - currentCount)
+export function getRemainingCategoryTags(
+  currentCount: number,
+  grade: UserGrade,
+  isAdmin: boolean = false
+): number {
+  if (isAdmin) return Infinity;
+  const limits = getGradeLimits(grade);
+  if (limits.maxCategoryTags === Infinity) return Infinity;
+  return Math.max(0, limits.maxCategoryTags - currentCount);
 }
 
-export function getRemainingTags(currentCount: number, grade: UserGrade): number {
-  const limits = getGradeLimits(grade)
-  if (limits.maxTags === Infinity) return Infinity
-  return Math.max(0, limits.maxTags - currentCount)
+export function getRemainingImages(
+  currentCount: number,
+  grade: UserGrade,
+  isAdmin: boolean = false
+): number {
+  if (isAdmin) return Infinity;
+  const limits = getGradeLimits(grade);
+  if (!limits.canUploadImages) return 0;
+  if (limits.maxImages === Infinity) return Infinity;
+  return Math.max(0, limits.maxImages - currentCount);
 }
 
+export function getEffectiveLimits(
+  grade: UserGrade,
+  isAdmin: boolean = false
+): GradeLimits {
+  if (isAdmin) {
+    return {
+      maxCategoryTags: Infinity,
+      maxImages: Infinity,
+      canUploadImages: true,
+      canUploadVideo: true,
+      canCustomizeColor: true,
+      canBeFeatured: true,
+      priority: 999,
+    };
+  }
+  return getGradeLimits(grade);
+}
 
+export function isEnterpriseGrade(grade: UserGrade): boolean {
+  return grade === "enterprise" || grade === "enterprise_trial";
+}
 
-
-
+export function shouldShowUpgradePrompt(
+  grade: UserGrade,
+  isAdmin: boolean
+): boolean {
+  if (isAdmin) return false;
+  return grade === "basic";
+}

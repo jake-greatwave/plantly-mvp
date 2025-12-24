@@ -35,7 +35,7 @@ export function UserManagement() {
     updates: {
       is_admin?: boolean;
       status?: "active" | "suspended";
-      user_grade?: "basic" | "enterprise";
+      user_grade?: "basic" | "enterprise" | "enterprise_trial";
     },
     optimisticUpdate: (user: User) => User
   ) => {

@@ -1,6 +1,6 @@
 export type UserStatus = 'active' | 'suspended'
 
-export type UserGrade = 'basic' | 'enterprise'
+export type UserGrade = 'basic' | 'enterprise' | 'enterprise_trial'
 
 export interface LoginRequest {
   email: string

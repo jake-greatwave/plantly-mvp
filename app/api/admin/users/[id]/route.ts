@@ -28,7 +28,7 @@ export async function PATCH(
     if (status === "active" || status === "suspended") {
       updates.status = status;
     }
-    if (user_grade === "basic" || user_grade === "enterprise") {
+    if (user_grade === "basic" || user_grade === "enterprise" || user_grade === "enterprise_trial") {
       updates.user_grade = user_grade;
     }
 
