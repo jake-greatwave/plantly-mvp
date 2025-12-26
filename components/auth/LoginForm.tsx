@@ -121,7 +121,7 @@ export function LoginForm() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <Checkbox
                     checked={remember}
@@ -129,14 +129,6 @@ export function LoginForm() {
                   />
                   <span className="text-sm text-gray-700">로그인 유지</span>
                 </label>
-                <Button
-                  type="button"
-                  variant="link"
-                  onClick={() => router.push('/forgot-password')}
-                  className="text-blue-600 hover:text-blue-700 p-0 h-auto"
-                >
-                  비밀번호 찾기
-                </Button>
               </div>
 
               <Button
