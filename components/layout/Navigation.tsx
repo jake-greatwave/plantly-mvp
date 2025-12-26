@@ -59,7 +59,13 @@ export function Navigation({ isLoggedIn, userName, isAdmin }: NavigationProps) {
       {isLoggedIn ? (
         <div className="flex items-center gap-3">
           {userName && (
-            <span className="text-sm text-gray-700">{userName}님</span>
+            <Button
+              asChild
+              variant="ghost"
+              className="text-sm text-gray-700 hover:text-gray-900 p-0 h-auto"
+            >
+              <Link href="/account/settings">{userName}님</Link>
+            </Button>
           )}
           <Button
             onClick={handleLogout}
