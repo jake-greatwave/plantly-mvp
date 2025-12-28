@@ -94,9 +94,6 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
     setIsAdmin(initialIsAdmin)
   }, [initialUserGrade, initialIsAdmin])
 
-  useEffect(() => {
-    formDataRef.current = formData
-  }, [formData])
 
   const loadCompanyData = async (id: string) => {
     try {

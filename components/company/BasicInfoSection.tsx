@@ -107,7 +107,6 @@ export const BasicInfoSection = memo(function BasicInfoSection({ data, onFieldCh
               id="business_number"
               value={data.business_number || ''}
               onChange={(e) => handleBusinessNumberChange(e.target.value)}
-              onBlur={handleVerifyBusinessNumber}
               placeholder="000-00-00000"
               maxLength={12}
               required

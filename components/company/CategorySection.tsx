@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, memo } from 'react'
+import { useEffect, useState, memo, useCallback, useMemo } from 'react'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { MultiSelectField } from '@/components/forms/MultiSelectField'
@@ -31,16 +31,41 @@ export const CategorySection = memo(function CategorySection({ data, onFieldChan
   const [isLoadingChildren, setIsLoadingChildren] = useState(false)
   const [loadedParentCategoryId, setLoadedParentCategoryId] = useState<string>('')
 
+  const loadParentCategories = useCallback(async () => {
+    try {
+      setIsLoadingParents(true)
+      const categories = await getCategories(null)
+      setParentCategories(categories)
+    } catch (error) {
+      console.error('부모 카테고리 로드 오류:', error)
+    } finally {
+      setIsLoadingParents(false)
+    }
+  }, [])
+
+  const loadChildCategories = useCallback(async (parentId: string) => {
+    try {
+      setIsLoadingChildren(true)
+      const categories = await getCategories(parentId)
+      setChildCategories(categories)
+      return categories
+    } catch (error) {
+      console.error('자식 카테고리 로드 오류:', error)
+      return []
+    } finally {
+      setIsLoadingChildren(false)
+    }
+  }, [])
+
   useEffect(() => {
     loadParentCategories()
-  }, [])
+  }, [loadParentCategories])
 
   useEffect(() => {
     if (!isLoadingParents && parentCategories.length > 0 && data.parent_category && data.parent_category.trim() !== '') {
       if (loadedParentCategoryId !== data.parent_category) {
         const parentExists = parentCategories.some(cat => cat.id === data.parent_category)
         if (parentExists) {
-          setIsLoadingChildren(true)
           loadChildCategories(data.parent_category).then(() => {
             setLoadedParentCategoryId(data.parent_category || '')
           })
@@ -53,43 +78,27 @@ export const CategorySection = memo(function CategorySection({ data, onFieldChan
         setLoadedParentCategoryId('')
       }
     }
-  }, [parentCategories, isLoadingParents, data.parent_category, loadedParentCategoryId])
+  }, [isLoadingParents, data.parent_category, loadedParentCategoryId, parentCategories, loadChildCategories])
 
-  const loadParentCategories = async () => {
-    try {
-      setIsLoadingParents(true)
-      const categories = await getCategories(null)
-      setParentCategories(categories)
-    } catch (error) {
-      console.error('부모 카테고리 로드 오류:', error)
-    } finally {
-      setIsLoadingParents(false)
+  const categoryIds = useMemo(() => data.category_ids || [], [data.category_ids])
+  const limits = useMemo(() => getEffectiveLimits(userGrade, isAdmin), [userGrade, isAdmin])
+  const isEnterprise = useMemo(() => isEnterpriseGrade(userGrade), [userGrade])
+  const canAddMore = useMemo(() => canAddCategoryTag(categoryIds.length, userGrade, isAdmin) || isEnterprise, [categoryIds.length, userGrade, isAdmin, isEnterprise])
+  
+  const disabledOptions = useMemo(() => {
+    return canAddMore || isAdmin || isEnterprise ? [] : childCategories.map(c => c.id).filter(id => !categoryIds.includes(id))
+  }, [canAddMore, isAdmin, isEnterprise, childCategories, categoryIds])
+
+  const parentCategoryValue = useMemo(() => {
+    if (isLoadingParents || !data.parent_category || data.parent_category.trim() === '') {
+      return undefined
     }
-  }
-
-  const loadChildCategories = async (parentId: string) => {
-    try {
-      setIsLoadingChildren(true)
-      const categories = await getCategories(parentId)
-      setChildCategories(categories)
-      return categories
-    } catch (error) {
-      console.error('자식 카테고리 로드 오류:', error)
-      return []
-    } finally {
-      setIsLoadingChildren(false)
+    if (parentCategories.length === 0) {
+      return undefined
     }
-  }
-
-  const categoryIds = data.category_ids || []
-  const limits = getEffectiveLimits(userGrade, isAdmin)
-  const isEnterprise = isEnterpriseGrade(userGrade)
-  const canAddMore = canAddCategoryTag(categoryIds.length, userGrade, isAdmin) || isEnterprise
-  const disabledOptions = canAddMore || isAdmin || isEnterprise ? [] : childCategories.map(c => c.id).filter(id => !categoryIds.includes(id))
-
-  const parentCategoryValue = !isLoadingParents && data.parent_category && data.parent_category.trim() !== '' && parentCategories.some(cat => cat.id === data.parent_category) 
-    ? data.parent_category 
-    : undefined
+    const exists = parentCategories.some(cat => cat.id === data.parent_category)
+    return exists ? data.parent_category : undefined
+  }, [isLoadingParents, data.parent_category, parentCategories.length, parentCategories])
 
   return (
     <div className="space-y-5">
@@ -99,23 +108,26 @@ export const CategorySection = memo(function CategorySection({ data, onFieldChan
 
       <div className="space-y-2">
         <Label>메가 카테고리 <span className="text-red-500">*</span></Label>
-        <Select
-          key={`parent-${parentCategories.length}-${parentCategoryValue || 'empty'}`}
-          value={parentCategoryValue}
-          onValueChange={(value) => onFieldsChange({ parent_category: value, category_ids: [] })}
-          disabled={isLoadingParents}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder={isLoadingParents ? "로딩 중..." : "카테고리 선택"} />
-          </SelectTrigger>
-          <SelectContent>
-            {parentCategories.map((cat) => (
-              <SelectItem key={cat.id} value={cat.id}>
-                {cat.category_name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {isLoadingParents ? (
+          <div className="text-sm text-gray-500 py-2">로딩 중...</div>
+        ) : (
+          <Select
+            key={`parent-select-${parentCategories.length}-${parentCategoryValue || 'empty'}`}
+            value={parentCategoryValue}
+            onValueChange={(value) => onFieldsChange({ parent_category: value, category_ids: [] })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="카테고리 선택" />
+            </SelectTrigger>
+            <SelectContent>
+              {parentCategories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id}>
+                  {cat.category_name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       {(childCategories.length > 0 || (data.parent_category && isLoadingChildren)) && (
@@ -137,7 +149,6 @@ export const CategorySection = memo(function CategorySection({ data, onFieldChan
               onChange={(value) => onFieldChange('category_ids', value)}
               maxSelections={limits.maxCategoryTags === Infinity ? undefined : limits.maxCategoryTags}
               disabledOptions={disabledOptions}
-              key={`multiselect-${childCategories.length}-${categoryIds.join(',')}`}
             />
           )}
           {!canAddMore && !isAdmin && userGrade === 'basic' && (
