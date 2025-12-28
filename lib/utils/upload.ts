@@ -34,3 +34,4 @@ export async function uploadMultipleFiles(files: File[], bucket: string = 'compa
 
 
 
+

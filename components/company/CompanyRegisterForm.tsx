@@ -16,6 +16,7 @@ import type { CompanyFormData } from '@/lib/types/company-form.types'
 
 const DEFAULT_FORM_DATA: Partial<CompanyFormData> = {
   brand_color: '#3B82F6',
+  parent_category: '',
   category_ids: [],
   industries: [],
   equipment_list: [],
@@ -23,6 +24,7 @@ const DEFAULT_FORM_DATA: Partial<CompanyFormData> = {
   certifications: [],
   images: [],
   countries: [],
+  pricing_type: '',
 }
 
 interface CompanyRegisterFormProps {
@@ -34,6 +36,7 @@ interface CompanyRegisterFormProps {
 export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false, userGrade: initialUserGrade = 'basic' }: CompanyRegisterFormProps) {
   const router = useRouter()
   const [formData, setFormData] = useState<Partial<CompanyFormData>>(DEFAULT_FORM_DATA)
+  const formDataRef = useRef<Partial<CompanyFormData>>(DEFAULT_FORM_DATA)
   const [isSaving, setIsSaving] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
   const [isBusinessNumberVerified, setIsBusinessNumberVerified] = useState(false)
@@ -67,9 +70,18 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
       if (savedDraft) {
         try {
           const parsed = JSON.parse(savedDraft)
-          setFormData(parsed)
+          const normalizedData = {
+            ...DEFAULT_FORM_DATA,
+            ...parsed,
+            parent_category: parsed.parent_category ? String(parsed.parent_category) : '',
+            category_ids: Array.isArray(parsed.category_ids) ? parsed.category_ids.map(String) : [],
+            pricing_type: parsed.pricing_type ? String(parsed.pricing_type) : '',
+          }
+          setFormData(normalizedData)
+          formDataRef.current = normalizedData
           toast.info('임시 저장된 데이터를 불러왔습니다')
-        } catch {
+        } catch (error) {
+          console.error('임시 저장 데이터 불러오기 오류:', error)
           toast.error('임시 저장 데이터를 불러오는데 실패했습니다')
         }
       }
@@ -81,6 +93,7 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
     setUserGrade(initialUserGrade as 'basic' | 'enterprise' | 'enterprise_trial')
     setIsAdmin(initialIsAdmin)
   }, [initialUserGrade, initialIsAdmin])
+
 
   const loadCompanyData = async (id: string) => {
     try {
@@ -107,7 +120,7 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
           mainAddress = fullAddress.replace(addressDetail, '').trim()
         }
 
-        setFormData({
+        const loadedData = {
           company_name: company.company_name,
           business_number: company.business_number,
           intro_title: company.intro_title,
@@ -136,7 +149,9 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
           as_info: company.as_info || '',
           pricing_type: company.pricing_type || '',
           brand_color: company.brand_color || '#3B82F6',
-        })
+        }
+        setFormData(loadedData)
+        formDataRef.current = loadedData
         toast.success('기업 정보를 불러왔습니다')
       } else {
         toast.error('기업 정보를 불러오는데 실패했습니다')
@@ -149,26 +164,39 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
   }
 
   const handleFieldChange = useCallback((field: keyof CompanyFormData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    setFormData(prev => {
+      const updated = { ...prev, [field]: value }
+      formDataRef.current = updated
+      return updated
+    })
     if (field === 'business_number') {
       setIsBusinessNumberVerified(false)
     }
   }, [])
 
   const handleFieldsChange = useCallback((fields: Partial<CompanyFormData>) => {
-    setFormData(prev => ({ ...prev, ...fields }))
+    setFormData(prev => {
+      const updated = { ...prev, ...fields }
+      formDataRef.current = updated
+      return updated
+    })
   }, [])
 
-  const handleTempSave = async () => {
+  const handleTempSave = () => {
     setIsSaving(true)
-    try {
-      localStorage.setItem('company_draft', JSON.stringify(formData))
-      toast.success('임시 저장되었습니다')
-    } catch {
-      toast.error('임시 저장에 실패했습니다')
-    } finally {
+    setFormData(currentData => {
+      const dataToSave = { ...currentData }
+      try {
+        localStorage.setItem('company_draft', JSON.stringify(dataToSave))
+        formDataRef.current = dataToSave
+        toast.success('임시 저장되었습니다')
+      } catch (error) {
+        console.error('임시 저장 오류:', error)
+        toast.error('임시 저장에 실패했습니다')
+      }
       setIsSaving(false)
-    }
+      return currentData
+    })
   }
 
   const validateForm = (): { isValid: boolean; errorField?: string; section?: 'basic' | 'category' } => {
@@ -331,6 +359,7 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
             userGrade={userGrade} 
             isAdmin={isAdmin}
             onUpgradeSuccess={refreshUserInfo}
+            isLoaded={isLoaded}
           />
         </div>
         <Separator />
