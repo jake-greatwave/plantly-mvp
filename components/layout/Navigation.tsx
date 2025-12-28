@@ -91,4 +91,3 @@ export function Navigation({ isLoggedIn, userName, isAdmin }: NavigationProps) {
     </nav>
   )
 }
-

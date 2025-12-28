@@ -55,7 +55,8 @@ export const TradingConditionSection = memo(function TradingConditionSection({ d
       <div className="space-y-2">
         <Label>견적 산출 방식</Label>
         <Select
-          value={data.pricing_type}
+          key={`pricing-${data.pricing_type || 'empty'}`}
+          value={data.pricing_type && data.pricing_type.trim() !== '' && PRICING_TYPES.some(type => type.value === data.pricing_type) ? data.pricing_type : undefined}
           onValueChange={(value) => onFieldChange('pricing_type', value)}
         >
           <SelectTrigger>
@@ -73,6 +74,7 @@ export const TradingConditionSection = memo(function TradingConditionSection({ d
     </div>
   )
 })
+
 
 
 
