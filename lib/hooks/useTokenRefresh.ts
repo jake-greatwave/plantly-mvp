@@ -3,6 +3,19 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 
+const AUTH_REQUIRED_PATHS = [
+  '/companies/register',
+  '/companies/edit',
+  '/my-company',
+  '/admin',
+  '/account',
+]
+
+function isAuthRequiredPath(pathname: string | null): boolean {
+  if (!pathname) return false
+  return AUTH_REQUIRED_PATHS.some(path => pathname.startsWith(path))
+}
+
 export function useTokenRefresh() {
   const isRefreshing = useRef(false)
   const hasRedirected = useRef(false)
@@ -49,13 +62,15 @@ export function useTokenRefresh() {
             return
           }
 
-          hasRedirected.current = true
-          await fetch('/api/auth/logout', {
-            method: 'POST',
-            credentials: 'include',
-          }).catch(() => {})
-          
-          router.push('/login')
+          if (isAuthRequiredPath(pathname)) {
+            hasRedirected.current = true
+            await fetch('/api/auth/logout', {
+              method: 'POST',
+              credentials: 'include',
+            }).catch(() => {})
+            
+            router.push('/login')
+          }
           return
         }
         console.error('Token refresh failed:', data.error || 'Unknown error')
@@ -73,15 +88,17 @@ export function useTokenRefresh() {
         return
       }
 
-      hasRedirected.current = true
-      try {
-        await fetch('/api/auth/logout', {
-          method: 'POST',
-          credentials: 'include',
-        }).catch(() => {})
-      } catch {}
-      
-      router.push('/login')
+      if (isAuthRequiredPath(pathname)) {
+        hasRedirected.current = true
+        try {
+          await fetch('/api/auth/logout', {
+            method: 'POST',
+            credentials: 'include',
+          }).catch(() => {})
+        } catch {}
+        
+        router.push('/login')
+      }
     } finally {
       isRefreshing.current = false
     }
