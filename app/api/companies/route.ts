@@ -419,28 +419,44 @@ export async function POST(request: NextRequest) {
       await supabase.from("company_categories").insert(categoryInserts);
     }
 
-    if (body.countries && body.countries.length > 0) {
-      const { data: regions } = await supabase
-        .from("regions")
-        .select("id, region_name")
-        .eq("region_type", "country")
-        .in("region_name", body.countries);
+    if (body.countries && Array.isArray(body.countries)) {
+      if (body.countries.length > 0) {
+        const { data: regions, error: regionsError } = await supabase
+          .from("regions")
+          .select("id, region_name")
+          .eq("region_type", "country")
+          .in("region_name", body.countries);
 
-      if (regions && regions.length > 0) {
-        const regionMap = new Map(
-          regions.map((r) => [r.region_name, r.id])
-        );
+        if (regionsError) {
+          console.error("Regions query error:", regionsError);
+        }
 
-        const countryInserts = body.countries
-          .filter((country: string) => regionMap.has(country))
-          .map((country: string) => ({
-            company_id: companyId,
-            region_id: regionMap.get(country),
-            region_type: "country" as const,
-          }));
+        if (regions && regions.length > 0) {
+          const regionMap = new Map(
+            regions.map((r) => [r.region_name, r.id])
+          );
 
-        if (countryInserts.length > 0) {
-          await supabase.from("company_regions").insert(countryInserts);
+          const countryInserts = body.countries
+            .filter((country: string) => regionMap.has(country))
+            .map((country: string) => ({
+              company_id: companyId,
+              region_id: regionMap.get(country),
+              region_type: "country" as const,
+            }));
+
+          if (countryInserts.length > 0) {
+            const { error: insertError } = await supabase
+              .from("company_regions")
+              .insert(countryInserts);
+
+            if (insertError) {
+              console.error("Company regions insert error:", insertError);
+            }
+          } else {
+            console.warn("No valid countries found in regions table:", body.countries);
+          }
+        } else {
+          console.warn("No regions found for countries:", body.countries);
         }
       }
     }

@@ -102,7 +102,10 @@ export function UpgradeSurveyDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        className="!max-w-2xl max-h-[90vh] overflow-y-auto w-full"
+        style={{ maxWidth: "42rem" }}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl">
             유료 기능을 3개월간 무료로 써보세요!
