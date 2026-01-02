@@ -28,7 +28,11 @@ export async function GET() {
 
     const { data, error } = await supabase
       .from('companies')
-      .select('*')
+      .select(`
+        *,
+        company_images(id, image_url, image_type, display_order),
+        company_categories(category_id, categories(id, category_name))
+      `)
       .eq('user_id', user.userId)
       .order('created_at', { ascending: false })
 
