@@ -42,6 +42,10 @@ export async function FeaturedCompanies() {
                 location={company.address}
                 tags={company.company_tags}
                 categories={company.company_categories}
+                isVerified={company.is_verified}
+                isFeatured={company.is_featured}
+                ceoName={company.ceo_name}
+                industries={company.industries}
               />
             )
           })}

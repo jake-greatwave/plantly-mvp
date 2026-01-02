@@ -415,6 +415,10 @@ export async function POST(request: NextRequest) {
       categoryIds.push(body.parent_category);
     }
 
+    if (body.middle_category) {
+      categoryIds.push(body.middle_category);
+    }
+
     if (body.category_ids && body.category_ids.length > 0) {
       categoryIds.push(...body.category_ids);
     }

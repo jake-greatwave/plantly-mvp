@@ -13,6 +13,7 @@ export interface CompanyFormData {
   address_detail: string;
 
   parent_category: string;
+  middle_category: string;
   category_ids: string[];
   industries: string[];
 

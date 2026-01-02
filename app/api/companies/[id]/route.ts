@@ -82,6 +82,10 @@ export async function GET(request: Request, { params }: RouteParams) {
       (cc: any) => cc.categories?.parent_id === null
     )?.category_id
 
+    const middleCategory = data.company_categories?.find(
+      (cc: any) => cc.categories?.parent_id === parentCategory
+    )?.category_id
+
     const countries = data.company_regions
       ?.filter((cr: any) => cr.regions?.region_type === 'country')
       .map((cr: any) => cr.regions?.region_name)
@@ -92,6 +96,7 @@ export async function GET(request: Request, { params }: RouteParams) {
       data: {
         ...data,
         parent_category: parentCategory || null,
+        middle_category: middleCategory || null,
         countries,
       },
     })
@@ -217,6 +222,10 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
     if (body.parent_category) {
       categoryIds.push(body.parent_category)
+    }
+
+    if (body.middle_category) {
+      categoryIds.push(body.middle_category)
     }
 
     if (body.category_ids && body.category_ids.length > 0) {

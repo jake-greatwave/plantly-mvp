@@ -19,6 +19,7 @@ const DEFAULT_FORM_DATA: Partial<CompanyFormData> = {
   main_image: '',
   brand_color: '#3B82F6',
   parent_category: '',
+  middle_category: '',
   category_ids: [],
   industries: [],
   equipment_list: [],
@@ -76,6 +77,7 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
             ...DEFAULT_FORM_DATA,
             ...parsed,
             parent_category: parsed.parent_category ? String(parsed.parent_category) : '',
+            middle_category: parsed.middle_category ? String(parsed.middle_category) : '',
             category_ids: Array.isArray(parsed.category_ids) ? parsed.category_ids.map(String) : [],
             pricing_type: parsed.pricing_type ? String(parsed.pricing_type) : '',
           }
@@ -111,8 +113,15 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
           (cc: any) => cc.categories?.parent_id === null
         )?.category_id
         
+        const middleCategory = company.company_categories?.find(
+          (cc: any) => cc.categories?.parent_id === parentCategory
+        )?.category_id
+        
         const subCategoryIds = company.company_categories
-          ?.filter((cc: any) => cc.categories?.parent_id !== null)
+          ?.filter((cc: any) => {
+            const parentId = cc.categories?.parent_id
+            return parentId && parentId !== parentCategory && parentId === middleCategory
+          })
           .map((cc: any) => cc.category_id) || []
         
         const fullAddress = company.address || ''
@@ -137,6 +146,7 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
           address: mainAddress,
           address_detail: addressDetail,
           parent_category: parentCategory || '',
+          middle_category: middleCategory || '',
           category_ids: subCategoryIds,
           industries: company.industries || [],
           equipment_list: company.equipment || [],
@@ -221,6 +231,15 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
     }
     if (!formData.address_detail) {
       return { isValid: false, errorField: '상세주소', section: 'basic' }
+    }
+    if (!formData.parent_category) {
+      return { isValid: false, errorField: '대분류', section: 'category' }
+    }
+    if (!formData.middle_category) {
+      return { isValid: false, errorField: '중분류', section: 'category' }
+    }
+    if (!formData.category_ids || formData.category_ids.length === 0) {
+      return { isValid: false, errorField: '소분류', section: 'category' }
     }
     return { isValid: true }
   }
