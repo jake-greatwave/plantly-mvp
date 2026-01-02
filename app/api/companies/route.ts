@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1", 10);
     const limit = parseInt(searchParams.get("limit") || String(ITEMS_PER_PAGE), 10);
     const categoryId = searchParams.get("category_id");
+    const middleCategoryId = searchParams.get("middle_category_id");
     const parentCategoryId = searchParams.get("parent_category_id");
     const regionId = searchParams.get("region_id");
     const countries = searchParams.get("countries")?.split(",").filter(Boolean) || [];
@@ -23,54 +24,55 @@ export async function GET(request: NextRequest) {
 
     let companyIds: string[] | null = null;
 
-    if (parentCategoryId) {
-      const { data: categoryData } = await supabase
-        .from("company_categories")
-        .select("company_id")
-        .eq("category_id", parentCategoryId);
+    const selectedCategoryIds: string[] = [];
+    if (parentCategoryId) selectedCategoryIds.push(parentCategoryId);
+    if (middleCategoryId) selectedCategoryIds.push(middleCategoryId);
+    if (categoryId) selectedCategoryIds.push(categoryId);
 
-      if (categoryData && categoryData.length > 0) {
-        companyIds = categoryData.map((item) => item.company_id);
-      } else {
-        return NextResponse.json({
-          companies: [],
-          pagination: {
-            page: 1,
-            limit,
-            total: 0,
-            totalPages: 0,
-            hasNextPage: false,
-            hasPrevPage: false,
-          },
-        });
-      }
-    }
+    if (selectedCategoryIds.length > 0) {
+      const categoryCompanyIdSets: Set<string>[] = [];
 
-    if (categoryId) {
-      const { data: categoryData } = await supabase
-        .from("company_categories")
-        .select("company_id")
-        .eq("category_id", categoryId);
+      for (const catId of selectedCategoryIds) {
+        const { data: categoryData } = await supabase
+          .from("company_categories")
+          .select("company_id")
+          .eq("category_id", catId);
 
-      if (categoryData && categoryData.length > 0) {
-        const categoryCompanyIds = categoryData.map((item) => item.company_id);
-        if (companyIds) {
-          companyIds = companyIds.filter((id) => categoryCompanyIds.includes(id));
+        if (categoryData && categoryData.length > 0) {
+          categoryCompanyIdSets.push(new Set(categoryData.map((item) => item.company_id)));
         } else {
-          companyIds = categoryCompanyIds;
+          return NextResponse.json({
+            companies: [],
+            pagination: {
+              page: 1,
+              limit,
+              total: 0,
+              totalPages: 0,
+              hasNextPage: false,
+              hasPrevPage: false,
+            },
+          });
         }
-      } else {
-        return NextResponse.json({
-          companies: [],
-          pagination: {
-            page: 1,
-            limit,
-            total: 0,
-            totalPages: 0,
-            hasNextPage: false,
-            hasPrevPage: false,
-          },
-        });
+      }
+
+      if (categoryCompanyIdSets.length > 0) {
+        companyIds = Array.from(categoryCompanyIdSets[0]).filter((companyId) =>
+          categoryCompanyIdSets.every((set) => set.has(companyId))
+        );
+
+        if (companyIds.length === 0) {
+          return NextResponse.json({
+            companies: [],
+            pagination: {
+              page: 1,
+              limit,
+              total: 0,
+              totalPages: 0,
+              hasNextPage: false,
+              hasPrevPage: false,
+            },
+          });
+        }
       }
     }
 
@@ -204,15 +206,15 @@ export async function GET(request: NextRequest) {
         company_tags(*)
       `,
         { count: "exact" }
-      )
-      .eq("is_verified", true);
+      );
 
-    if (companyIds) {
+    if (companyIds && companyIds.length > 0) {
       query = query.in("id", companyIds);
     }
 
     if (search) {
-      const searchTerm = `%${search}%`;
+      const escapedSearch = search.replace(/[%_\\]/g, "\\$&");
+      const searchTerm = `%${escapedSearch}%`;
       
       const { data: categoryMatches } = await supabase
         .from("categories")
@@ -248,21 +250,36 @@ export async function GET(request: NextRequest) {
       }
       tagCompanyIds.forEach((id) => allSearchCompanyIds.add(id));
 
-      const searchConditions = [
-        `company_name.ilike.${searchTerm}`,
-        `intro_title.ilike.${searchTerm}`,
-        `intro_content.ilike.${searchTerm}`,
-        `project_title.ilike.${searchTerm}`,
-        `achievements.ilike.${searchTerm}`,
-        `partners.ilike.${searchTerm}`,
-      ];
-
+      const searchConditions: string[] = [];
+      
       if (allSearchCompanyIds.size > 0) {
         const idsArray = Array.from(allSearchCompanyIds);
         searchConditions.push(`id.in.(${idsArray.join(",")})`);
       }
 
-      query = query.or(searchConditions.join(","));
+      const textFields = [
+        "company_name",
+        "intro_title",
+        "intro_content",
+        "project_title",
+        "achievements",
+        "partners",
+      ];
+
+      const escapedSearchTerm = searchTerm
+        .replace(/\\/g, "\\\\")
+        .replace(/,/g, "\\,")
+        .replace(/\(/g, "\\(")
+        .replace(/\)/g, "\\)")
+        .replace(/\./g, "\\.");
+
+      for (const field of textFields) {
+        searchConditions.push(`${field}.ilike.${escapedSearchTerm}`);
+      }
+
+      if (searchConditions.length > 0) {
+        query = query.or(searchConditions.join(","));
+      }
     }
 
     if (isVerified === "true") {

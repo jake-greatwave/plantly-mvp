@@ -17,17 +17,28 @@ type Category = Database["public"]["Tables"]["categories"]["Row"];
 
 interface SearchFiltersProps {
   onFilterChange?: () => void;
+  onFiltersReady?: (filters: {
+    parentCategory: string;
+    middleCategory: string;
+    subCategory: string;
+    industries: string[];
+    selectedCountries: string[];
+    isVerified: boolean;
+    isFeatured: boolean;
+  }) => void;
 }
 
-export function SearchFilters({ onFilterChange }: SearchFiltersProps) {
+export function SearchFilters({ onFilterChange, onFiltersReady }: SearchFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [parentCategories, setParentCategories] = useState<Category[]>([]);
+  const [middleCategories, setMiddleCategories] = useState<Category[]>([]);
   const [subCategories, setSubCategories] = useState<Category[]>([]);
   const [countries, setCountries] = useState<Array<{ id: string; name: string }>>([]);
 
   const currentSearch = searchParams.get("search") || "";
   const urlParentCategory = searchParams.get("parent_category_id") || "";
+  const urlMiddleCategory = searchParams.get("middle_category_id") || "";
   const urlSubCategory = searchParams.get("category_id") || "";
   const urlIndustries = searchParams.get("industries")?.split(",").filter(Boolean) || [];
   const urlCountries = searchParams.get("countries")?.split(",").filter(Boolean) || [];
@@ -35,6 +46,7 @@ export function SearchFilters({ onFilterChange }: SearchFiltersProps) {
   const urlIsFeatured = searchParams.get("is_featured") === "true";
 
   const [parentCategory, setParentCategory] = useState(urlParentCategory);
+  const [middleCategory, setMiddleCategory] = useState(urlMiddleCategory);
   const [subCategory, setSubCategory] = useState(urlSubCategory);
   const [industries, setIndustries] = useState<string[]>(urlIndustries);
   const [selectedCountries, setSelectedCountries] = useState<string[]>(urlCountries);
@@ -43,12 +55,27 @@ export function SearchFilters({ onFilterChange }: SearchFiltersProps) {
 
   useEffect(() => {
     setParentCategory(urlParentCategory);
+    setMiddleCategory(urlMiddleCategory);
     setSubCategory(urlSubCategory);
     setIndustries(urlIndustries);
     setSelectedCountries(urlCountries);
     setIsVerified(urlIsVerified);
     setIsFeatured(urlIsFeatured);
-  }, [searchParams]);
+  }, [urlParentCategory, urlMiddleCategory, urlSubCategory, urlIndustries.join(","), urlCountries.join(","), urlIsVerified, urlIsFeatured]);
+
+  useEffect(() => {
+    if (onFiltersReady) {
+      onFiltersReady({
+        parentCategory,
+        middleCategory,
+        subCategory,
+        industries,
+        selectedCountries,
+        isVerified,
+        isFeatured,
+      });
+    }
+  }, [parentCategory, middleCategory, subCategory, industries, selectedCountries, isVerified, isFeatured, onFiltersReady]);
 
   useEffect(() => {
     loadParentCategories();
@@ -57,19 +84,33 @@ export function SearchFilters({ onFilterChange }: SearchFiltersProps) {
 
   useEffect(() => {
     if (parentCategory) {
-      loadSubCategories(parentCategory);
+      loadMiddleCategories(parentCategory);
     } else {
+      setMiddleCategories([]);
       setSubCategories([]);
     }
   }, [parentCategory]);
+
+  useEffect(() => {
+    if (middleCategory) {
+      loadSubCategories(middleCategory);
+    } else {
+      setSubCategories([]);
+    }
+  }, [middleCategory]);
 
   const loadParentCategories = async () => {
     const categories = await getCategories(null);
     setParentCategories(categories || []);
   };
 
-  const loadSubCategories = async (parentId: string) => {
+  const loadMiddleCategories = async (parentId: string) => {
     const categories = await getCategories(parentId);
+    setMiddleCategories(categories || []);
+  };
+
+  const loadSubCategories = async (middleId: string) => {
+    const categories = await getCategories(middleId);
     setSubCategories(categories || []);
   };
 
@@ -93,6 +134,9 @@ export function SearchFilters({ onFilterChange }: SearchFiltersProps) {
     if (parentCategory) {
       params.set("parent_category_id", parentCategory);
     }
+    if (middleCategory) {
+      params.set("middle_category_id", middleCategory);
+    }
     if (subCategory) {
       params.set("category_id", subCategory);
     }
@@ -115,6 +159,12 @@ export function SearchFilters({ onFilterChange }: SearchFiltersProps) {
 
   const handleParentCategoryChange = (value: string) => {
     setParentCategory(value);
+    setMiddleCategory("");
+    setSubCategory("");
+  };
+
+  const handleMiddleCategoryChange = (value: string) => {
+    setMiddleCategory(value);
     setSubCategory("");
   };
 
@@ -139,16 +189,18 @@ export function SearchFilters({ onFilterChange }: SearchFiltersProps) {
   };
 
   const clearAllFilters = () => {
-    setParentCategory("");
-    setSubCategory("");
-    setIndustries([]);
-    setSelectedCountries([]);
-    setIsVerified(false);
-    setIsFeatured(false);
+    const params = new URLSearchParams();
+    if (currentSearch) {
+      params.set("search", currentSearch);
+    }
+    params.set("page", "1");
+    router.push(`/companies?${params.toString()}`);
+    onFilterChange?.();
   };
 
   const hasActiveFilters =
     parentCategory ||
+    middleCategory ||
     subCategory ||
     industries.length > 0 ||
     selectedCountries.length > 0 ||
@@ -175,7 +227,7 @@ export function SearchFilters({ onFilterChange }: SearchFiltersProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
         <div className="space-y-1">
-          <Label className="text-xs">메가 카테고리</Label>
+          <Label className="text-xs">대분류</Label>
           <Select
             value={parentCategory || undefined}
             onValueChange={handleParentCategoryChange}
@@ -193,9 +245,30 @@ export function SearchFilters({ onFilterChange }: SearchFiltersProps) {
           </Select>
         </div>
 
+        {middleCategories.length > 0 && (
+          <div className="space-y-1">
+            <Label className="text-xs">중분류</Label>
+            <Select
+              value={middleCategory || undefined}
+              onValueChange={handleMiddleCategoryChange}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="전체" />
+              </SelectTrigger>
+              <SelectContent>
+                {middleCategories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id}>
+                    {cat.category_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         {subCategories.length > 0 && (
           <div className="space-y-1">
-            <Label className="text-xs">세부 공정 태그</Label>
+            <Label className="text-xs">소분류</Label>
             <Select
               value={subCategory || undefined}
               onValueChange={handleSubCategoryChange}
@@ -267,12 +340,6 @@ export function SearchFilters({ onFilterChange }: SearchFiltersProps) {
             </label>
           </div>
         </div>
-      </div>
-
-      <div className="mt-3 flex justify-end">
-        <Button onClick={applyFilters} size="sm" className="bg-blue-600 hover:bg-blue-700">
-          검색하기
-        </Button>
       </div>
     </div>
   );
