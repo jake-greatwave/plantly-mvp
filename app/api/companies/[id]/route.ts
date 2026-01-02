@@ -193,12 +193,21 @@ export async function PUT(request: Request, { params }: RouteParams) {
     await supabase.from('company_categories').delete().eq('company_id', id)
     await supabase.from('company_regions').delete().eq('company_id', id)
 
+    if (body.main_image) {
+      await supabase.from('company_images').insert({
+        company_id: id,
+        image_url: body.main_image,
+        image_type: 'main' as const,
+        display_order: 0,
+      })
+    }
+
     if (body.images && body.images.length > 0) {
       const imageInserts = body.images.map((url: string, index: number) => ({
         company_id: id,
         image_url: url,
         image_type: 'portfolio' as const,
-        display_order: index,
+        display_order: index + 1,
       }))
 
       await supabase.from('company_images').insert(imageInserts)

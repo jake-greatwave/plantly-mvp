@@ -8,6 +8,7 @@ import { Building2 } from 'lucide-react'
 interface CompanyCardProps {
   id: string
   name: string
+  mainImage?: string | null
   logoUrl?: string | null
   description?: string | null
   location?: string
@@ -18,6 +19,7 @@ interface CompanyCardProps {
 export function CompanyCard({ 
   id, 
   name, 
+  mainImage,
   logoUrl, 
   description, 
   location,
@@ -34,6 +36,8 @@ export function CompanyCard({
     ? tags.slice(0, 3).map(t => `#${t.tag_name}`)
     : categories.slice(0, 3).map(c => c.categories?.category_name).filter(Boolean).map(name => `#${name}`)
 
+  const imageToShow = mainImage || logoUrl
+
   return (
     <Card
       onClick={handleClick}
@@ -41,8 +45,8 @@ export function CompanyCard({
     >
       <div className="flex items-start gap-3 mb-3">
         <div className="w-14 h-14 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-          {logoUrl ? (
-            <img src={logoUrl} alt={name} className="w-full h-full object-cover" />
+          {imageToShow ? (
+            <img src={imageToShow} alt={name} className="w-full h-full object-cover" />
           ) : (
             <Building2 className="w-7 h-7 text-gray-400" />
           )}

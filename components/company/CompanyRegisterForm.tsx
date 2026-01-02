@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
+import { MainImageSection } from './MainImageSection'
 import { BasicInfoSection } from './BasicInfoSection'
 import { CategorySection } from './CategorySection'
 import { TechnicalSpecSection } from './TechnicalSpecSection'
@@ -15,6 +16,7 @@ import { BrandingSection } from './BrandingSection'
 import type { CompanyFormData } from '@/lib/types/company-form.types'
 
 const DEFAULT_FORM_DATA: Partial<CompanyFormData> = {
+  main_image: '',
   brand_color: '#3B82F6',
   parent_category: '',
   category_ids: [],
@@ -102,7 +104,8 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
 
       if (response.ok && result.success) {
         const company = result.data
-        const imageUrls = company.company_images?.map((img: any) => img.image_url) || []
+        const mainImage = company.company_images?.find((img: any) => img.image_type === 'main')?.image_url || ''
+        const imageUrls = company.company_images?.filter((img: any) => img.image_type !== 'main').map((img: any) => img.image_url) || []
         
         const parentCategory = company.company_categories?.find(
           (cc: any) => cc.categories?.parent_id === null
@@ -121,6 +124,7 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
         }
 
         const loadedData = {
+          main_image: mainImage,
           company_name: company.company_name,
           business_number: company.business_number,
           intro_title: company.intro_title,
@@ -200,6 +204,9 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
   }
 
   const validateForm = (): { isValid: boolean; errorField?: string; section?: 'basic' | 'category' } => {
+    if (!formData.main_image) {
+      return { isValid: false, errorField: '대표 이미지', section: 'basic' }
+    }
     if (!formData.company_name) {
       return { isValid: false, errorField: '기업명', section: 'basic' }
     }
@@ -350,6 +357,8 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
         <div ref={basicInfoRef}>
           <BasicInfoSection data={formData} onFieldChange={handleFieldChange} onVerificationChange={setIsBusinessNumberVerified} />
         </div>
+        <Separator />
+        <MainImageSection data={formData} onFieldChange={handleFieldChange} />
         <Separator />
         <div ref={categoryRef}>
           <CategorySection 

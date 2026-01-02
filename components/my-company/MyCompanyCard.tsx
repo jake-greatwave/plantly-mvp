@@ -19,9 +19,7 @@ export function MyCompanyCard({ company, onDelete }: MyCompanyCardProps) {
   const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
 
-  const mainImage = company.company_images?.find((img: any) => img.image_type === 'main')?.image_url 
-    || company.company_images?.[0]?.image_url 
-    || company.logo_url
+  const mainImage = company.company_images?.find((img: any) => img.image_type === 'main')?.image_url || null
 
   const categories = company.company_categories?.map((cc: any) => cc.categories?.category_name).filter(Boolean) || []
 

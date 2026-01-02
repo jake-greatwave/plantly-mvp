@@ -389,12 +389,21 @@ export async function POST(request: NextRequest) {
 
     const companyId = company.id;
 
+    if (body.main_image) {
+      await supabase.from("company_images").insert({
+        company_id: companyId,
+        image_url: body.main_image,
+        image_type: "main" as const,
+        display_order: 0,
+      });
+    }
+
     if (body.images && body.images.length > 0) {
       const imageInserts = body.images.map((url: string, index: number) => ({
         company_id: companyId,
         image_url: url,
         image_type: "portfolio" as const,
-        display_order: index,
+        display_order: index + 1,
       }));
 
       await supabase.from("company_images").insert(imageInserts);

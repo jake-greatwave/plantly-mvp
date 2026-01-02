@@ -1,4 +1,5 @@
 export interface CompanyFormData {
+  main_image: string;
   company_name: string;
   business_number: string;
   intro_title: string;
