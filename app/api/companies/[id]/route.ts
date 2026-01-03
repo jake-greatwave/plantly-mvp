@@ -49,6 +49,7 @@ export async function GET(request: Request, { params }: RouteParams) {
         as_info,
         pricing_type,
         brand_color,
+        content,
         is_verified,
         is_featured,
         view_count,
@@ -169,6 +170,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
         as_info: body.as_info,
         pricing_type: body.pricing_type,
         brand_color: body.brand_color,
+        content: body.content || null,
       })
       .eq('id', id)
 

@@ -381,6 +381,7 @@ export async function POST(request: NextRequest) {
         as_info: body.as_info,
         pricing_type: body.pricing_type,
         brand_color: body.brand_color,
+        content: body.content || null,
         is_verified: false,
         is_featured: false,
         view_count: 0,

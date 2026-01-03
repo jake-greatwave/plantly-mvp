@@ -34,6 +34,7 @@ export interface CompanyFormData {
   pricing_type: string;
 
   brand_color: string;
+  content: string;
 }
 
 export const TRL_LEVELS = [

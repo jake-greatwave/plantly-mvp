@@ -13,6 +13,7 @@ import { TechnicalSpecSection } from './TechnicalSpecSection'
 import { ReferenceSection } from './ReferenceSection'
 import { TradingConditionSection } from './TradingConditionSection'
 import { BrandingSection } from './BrandingSection'
+import { ContentSection } from './ContentSection'
 import type { CompanyFormData } from '@/lib/types/company-form.types'
 
 const DEFAULT_FORM_DATA: Partial<CompanyFormData> = {
@@ -28,6 +29,7 @@ const DEFAULT_FORM_DATA: Partial<CompanyFormData> = {
   images: [],
   countries: [],
   pricing_type: '',
+  content: '',
 }
 
 interface CompanyRegisterFormProps {
@@ -163,6 +165,7 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
           as_info: company.as_info || '',
           pricing_type: company.pricing_type || '',
           brand_color: company.brand_color || '#3B82F6',
+          content: company.content || '',
         }
         setFormData(loadedData)
         formDataRef.current = loadedData
@@ -410,6 +413,8 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
           isAdmin={isAdmin}
           onUpgradeSuccess={refreshUserInfo}
         />
+        <Separator />
+        <ContentSection data={formData} onFieldChange={handleFieldChange} />
       </Card>
 
       <div className="flex gap-3 mt-6 sticky bottom-4 bg-white p-4 rounded-lg border border-gray-200 shadow-lg z-10">

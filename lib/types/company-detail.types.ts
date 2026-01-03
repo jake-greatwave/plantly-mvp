@@ -1,6 +1,7 @@
 import type { Database } from "./database.types";
 
 export type CompanyDetail = Database["public"]["Tables"]["companies"]["Row"] & {
+  content?: string | null;
   company_images?: Array<{
     id: string;
     image_url: string;
