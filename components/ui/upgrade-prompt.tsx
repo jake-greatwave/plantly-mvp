@@ -7,12 +7,13 @@ import { UpgradeSurveyDialog } from './upgrade-survey-dialog'
 
 interface UpgradePromptProps {
   feature: string
+  upgradeSource?: string
   children?: React.ReactNode
   variant?: 'inline' | 'overlay'
   onUpgradeSuccess?: () => void
 }
 
-export function UpgradePrompt({ feature, children, variant = 'inline', onUpgradeSuccess }: UpgradePromptProps) {
+export function UpgradePrompt({ feature, upgradeSource, children, variant = 'inline', onUpgradeSuccess }: UpgradePromptProps) {
   const [surveyOpen, setSurveyOpen] = useState(false)
 
   const handleSurveySuccess = () => {
@@ -40,6 +41,7 @@ export function UpgradePrompt({ feature, children, variant = 'inline', onUpgrade
           open={surveyOpen}
           onOpenChange={setSurveyOpen}
           feature={feature}
+          upgradeSource={upgradeSource || feature}
           onSuccess={handleSurveySuccess}
         />
       </>

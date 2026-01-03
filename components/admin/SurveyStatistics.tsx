@@ -25,6 +25,7 @@ interface SurveyStatistics {
     enterprise: number
   }
   features: Record<string, number>
+  upgradeSources: Record<string, number>
   dates: Record<string, number>
 }
 
@@ -175,17 +176,17 @@ export function SurveyStatistics() {
         </Card>
 
         <Card className="p-6">
-          <h2 className="text-lg font-semibold mb-4">기능별 사용 통계</h2>
+          <h2 className="text-lg font-semibold mb-4">업그레이드 포인트별 통계</h2>
           <div className="space-y-2">
-            {Object.entries(statistics.features).length > 0 ? (
-              Object.entries(statistics.features)
+            {Object.entries(statistics.upgradeSources).length > 0 ? (
+              Object.entries(statistics.upgradeSources)
                 .sort((a, b) => b[1] - a[1])
-                .map(([feature, count]) => {
+                .map(([source, count]) => {
                   const percentage = getPercentage(count, statistics.total)
                   return (
-                    <div key={feature}>
+                    <div key={source}>
                       <div className="flex justify-between mb-1">
-                        <span className="text-sm">{feature}</span>
+                        <span className="text-sm font-medium">{source}</span>
                         <span className="text-sm font-medium">{count}명 ({percentage}%)</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
@@ -211,7 +212,7 @@ export function SurveyStatistics() {
             <thead>
               <tr className="border-b">
                 <th className="text-left p-2">날짜</th>
-                <th className="text-left p-2">기능</th>
+                <th className="text-left p-2">업그레이드 포인트</th>
                 <th className="text-left p-2">Q1</th>
                 <th className="text-left p-2">Q2</th>
                 <th className="text-left p-2">Q3</th>
@@ -224,7 +225,7 @@ export function SurveyStatistics() {
                   <td className="p-2">
                     {new Date(survey.created_at).toLocaleDateString('ko-KR')}
                   </td>
-                  <td className="p-2">{survey.feature_used || '-'}</td>
+                  <td className="p-2 font-medium">{survey.upgrade_source || survey.feature_used || '-'}</td>
                   <td className="p-2">{getQ1Label(survey.q1_needs)}</td>
                   <td className="p-2">{getQ2Label(survey.q2_price)}</td>
                   <td className="p-2">{getQ3Label(survey.q3_wtp)}</td>

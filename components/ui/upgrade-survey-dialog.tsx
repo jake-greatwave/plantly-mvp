@@ -31,6 +31,7 @@ interface UpgradeSurveyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   feature: string;
+  upgradeSource?: string;
   onSuccess?: () => void;
 }
 
@@ -38,6 +39,7 @@ export function UpgradeSurveyDialog({
   open,
   onOpenChange,
   feature,
+  upgradeSource,
   onSuccess,
 }: UpgradeSurveyDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -63,6 +65,7 @@ export function UpgradeSurveyDialog({
         },
         body: JSON.stringify({
           feature_used: feature,
+          upgrade_source: upgradeSource || feature,
           q1_needs: q1Needs,
           q2_price: q2Price,
           q3_wtp: q3WTP,

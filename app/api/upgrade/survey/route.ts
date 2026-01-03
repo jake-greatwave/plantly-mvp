@@ -65,6 +65,7 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id: user.userId,
         feature_used: body.feature_used || null,
+        upgrade_source: body.upgrade_source || body.feature_used || null,
         q1_needs: body.q1_needs,
         q2_price: body.q2_price,
         q3_wtp: body.q3_wtp,

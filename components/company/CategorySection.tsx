@@ -361,6 +361,7 @@ export const CategorySection = memo(function CategorySection({
           {!canAddMore && !isAdmin && userGrade === "basic" && (
             <UpgradePrompt
               feature="소분류 태그"
+              upgradeSource="소분류 태그"
               onUpgradeSuccess={onUpgradeSuccess}
             />
           )}

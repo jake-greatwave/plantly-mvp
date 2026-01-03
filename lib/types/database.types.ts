@@ -55,6 +55,7 @@ export type Database = {
           id: string;
           user_id: string;
           feature_used: string | null;
+          upgrade_source: string | null;
           q1_needs: "very_important" | "normal" | "not_important";
           q2_price: "very_cheap" | "reasonable" | "somewhat_expensive" | "too_expensive";
           q3_wtp: "basic" | "standard" | "premium" | "enterprise";
@@ -65,6 +66,7 @@ export type Database = {
           id?: string;
           user_id: string;
           feature_used?: string | null;
+          upgrade_source?: string | null;
           q1_needs: "very_important" | "normal" | "not_important";
           q2_price: "very_cheap" | "reasonable" | "somewhat_expensive" | "too_expensive";
           q3_wtp: "basic" | "standard" | "premium" | "enterprise";
@@ -75,6 +77,7 @@ export type Database = {
           id?: string;
           user_id?: string;
           feature_used?: string | null;
+          upgrade_source?: string | null;
           q1_needs?: "very_important" | "normal" | "not_important";
           q2_price?: "very_cheap" | "reasonable" | "somewhat_expensive" | "too_expensive";
           q3_wtp?: "basic" | "standard" | "premium" | "enterprise";

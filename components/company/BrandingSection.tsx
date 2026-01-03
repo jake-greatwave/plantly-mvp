@@ -47,7 +47,7 @@ export const BrandingSection = memo(function BrandingSection({ data, onFieldChan
           />
         ) : (
           <div className="space-y-2">
-            <UpgradePrompt feature="대표 색상 커스터마이징" variant="inline" onUpgradeSuccess={onUpgradeSuccess} />
+            <UpgradePrompt feature="대표 색상 커스터마이징" upgradeSource="대표 색상 커스터마이징" variant="inline" onUpgradeSuccess={onUpgradeSuccess} />
             <ColorPickerField
               value={BASIC_COLOR}
               onChange={(value) => onFieldChange('brand_color', BASIC_COLOR)}
