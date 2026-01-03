@@ -49,6 +49,7 @@ export async function GET(request: Request, { params }: RouteParams) {
         as_info,
         pricing_type,
         brand_color,
+        content,
         is_verified,
         is_featured,
         view_count,
@@ -82,6 +83,10 @@ export async function GET(request: Request, { params }: RouteParams) {
       (cc: any) => cc.categories?.parent_id === null
     )?.category_id
 
+    const middleCategory = data.company_categories?.find(
+      (cc: any) => cc.categories?.parent_id === parentCategory
+    )?.category_id
+
     const countries = data.company_regions
       ?.filter((cr: any) => cr.regions?.region_type === 'country')
       .map((cr: any) => cr.regions?.region_name)
@@ -92,6 +97,7 @@ export async function GET(request: Request, { params }: RouteParams) {
       data: {
         ...data,
         parent_category: parentCategory || null,
+        middle_category: middleCategory || null,
         countries,
       },
     })
@@ -129,6 +135,8 @@ export async function PUT(request: Request, { params }: RouteParams) {
     const body = await request.json()
     const supabase = await createClient()
 
+    console.log('PUT request body.countries:', body.countries)
+
     const fullAddress = body.address
       ? body.address_detail
         ? `${body.address} ${body.address_detail}`
@@ -162,6 +170,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
         as_info: body.as_info,
         pricing_type: body.pricing_type,
         brand_color: body.brand_color,
+        content: body.content || null,
       })
       .eq('id', id)
 
@@ -191,12 +200,21 @@ export async function PUT(request: Request, { params }: RouteParams) {
     await supabase.from('company_categories').delete().eq('company_id', id)
     await supabase.from('company_regions').delete().eq('company_id', id)
 
+    if (body.main_image) {
+      await supabase.from('company_images').insert({
+        company_id: id,
+        image_url: body.main_image,
+        image_type: 'main' as const,
+        display_order: 0,
+      })
+    }
+
     if (body.images && body.images.length > 0) {
       const imageInserts = body.images.map((url: string, index: number) => ({
         company_id: id,
         image_url: url,
         image_type: 'portfolio' as const,
-        display_order: index,
+        display_order: index + 1,
       }))
 
       await supabase.from('company_images').insert(imageInserts)
@@ -206,6 +224,10 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
     if (body.parent_category) {
       categoryIds.push(body.parent_category)
+    }
+
+    if (body.middle_category) {
+      categoryIds.push(body.middle_category)
     }
 
     if (body.category_ids && body.category_ids.length > 0) {
@@ -221,28 +243,70 @@ export async function PUT(request: Request, { params }: RouteParams) {
       await supabase.from('company_categories').insert(categoryInserts)
     }
 
-    if (body.countries && body.countries.length > 0) {
-      const { data: regions } = await supabase
+    if (body.countries && Array.isArray(body.countries) && body.countries.length > 0) {
+      const { data: existingRegions, error: regionsError } = await supabase
         .from('regions')
         .select('id, region_name')
         .eq('region_type', 'country')
         .in('region_name', body.countries)
 
-      if (regions && regions.length > 0) {
-        const regionMap = new Map(
-          regions.map((r) => [r.region_name, r.id])
-        )
+      if (regionsError) {
+        console.error('Regions query error:', regionsError)
+      }
 
-        const countryInserts = body.countries
-          .filter((country: string) => regionMap.has(country))
-          .map((country: string) => ({
-            company_id: id,
-            region_id: regionMap.get(country),
-            region_type: 'country' as const,
-          }))
+      const regionMap = new Map<string, string>()
+      if (existingRegions) {
+        existingRegions.forEach((r) => {
+          regionMap.set(r.region_name, r.id)
+        })
+      }
 
-        if (countryInserts.length > 0) {
-          await supabase.from('company_regions').insert(countryInserts)
+      const missingCountries = body.countries.filter(
+        (country: string) => !regionMap.has(country)
+      )
+
+      if (missingCountries.length > 0) {
+        const newRegions = missingCountries.map((country: string, index: number) => ({
+          region_type: 'country' as const,
+          region_name: country,
+          region_code: country.substring(0, 2).toUpperCase(),
+          display_order: existingRegions ? existingRegions.length + index : index,
+          is_active: true,
+        }))
+
+        const { data: insertedRegions, error: insertRegionError } = await supabase
+          .from('regions')
+          .insert(newRegions)
+          .select('id, region_name')
+
+        if (insertRegionError) {
+          console.error('Failed to insert new regions:', insertRegionError)
+        } else if (insertedRegions) {
+          insertedRegions.forEach((r) => {
+            regionMap.set(r.region_name, r.id)
+          })
+        }
+      }
+
+      const countryInserts = body.countries
+        .filter((country: string) => regionMap.has(country))
+        .map((country: string) => ({
+          company_id: id,
+          region_id: regionMap.get(country)!,
+          region_type: 'country' as const,
+        }))
+
+      if (countryInserts.length > 0) {
+        const { error: insertError } = await supabase
+          .from('company_regions')
+          .insert(countryInserts)
+
+        if (insertError) {
+          console.error('Company regions insert error:', insertError)
+          return NextResponse.json(
+            { success: false, error: '대응 가능 국가 저장에 실패했습니다.' },
+            { status: 500 }
+          )
         }
       }
     }

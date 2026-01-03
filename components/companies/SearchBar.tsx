@@ -12,6 +12,15 @@ export function SearchBar() {
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [currentFilters, setCurrentFilters] = useState<{
+    parentCategory: string;
+    middleCategory: string;
+    subCategory: string;
+    industries: string[];
+    selectedCountries: string[];
+    isVerified: boolean;
+    isFeatured: boolean;
+  } | null>(null);
 
   useEffect(() => {
     const search = searchParams.get("search") || "";
@@ -20,13 +29,51 @@ export function SearchBar() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams();
     params.set("page", "1");
 
     if (searchQuery.trim()) {
       params.set("search", searchQuery.trim());
+    }
+
+    if (currentFilters) {
+      if (currentFilters.parentCategory) {
+        params.set("parent_category_id", currentFilters.parentCategory);
+      }
+      if (currentFilters.middleCategory) {
+        params.set("middle_category_id", currentFilters.middleCategory);
+      }
+      if (currentFilters.subCategory) {
+        params.set("category_id", currentFilters.subCategory);
+      }
+      if (currentFilters.industries.length > 0) {
+        params.set("industries", currentFilters.industries.join(","));
+      }
+      if (currentFilters.selectedCountries.length > 0) {
+        params.set("countries", currentFilters.selectedCountries.join(","));
+      }
+      if (currentFilters.isVerified) {
+        params.set("is_verified", "true");
+      }
+      if (currentFilters.isFeatured) {
+        params.set("is_featured", "true");
+      }
     } else {
-      params.delete("search");
+      const urlParentCategory = searchParams.get("parent_category_id");
+      const urlMiddleCategory = searchParams.get("middle_category_id");
+      const urlSubCategory = searchParams.get("category_id");
+      const urlIndustries = searchParams.get("industries");
+      const urlCountries = searchParams.get("countries");
+      const urlIsVerified = searchParams.get("is_verified");
+      const urlIsFeatured = searchParams.get("is_featured");
+
+      if (urlParentCategory) params.set("parent_category_id", urlParentCategory);
+      if (urlMiddleCategory) params.set("middle_category_id", urlMiddleCategory);
+      if (urlSubCategory) params.set("category_id", urlSubCategory);
+      if (urlIndustries) params.set("industries", urlIndustries);
+      if (urlCountries) params.set("countries", urlCountries);
+      if (urlIsVerified) params.set("is_verified", urlIsVerified);
+      if (urlIsFeatured) params.set("is_featured", urlIsFeatured);
     }
 
     router.push(`/companies?${params.toString()}`);
@@ -34,6 +81,7 @@ export function SearchBar() {
 
   const hasActiveFilters =
     searchParams.get("parent_category_id") ||
+    searchParams.get("middle_category_id") ||
     searchParams.get("category_id") ||
     searchParams.get("industries") ||
     searchParams.get("countries") ||
@@ -80,6 +128,7 @@ export function SearchBar() {
             onFilterChange={() => {
               const hasFilters =
                 searchParams.get("parent_category_id") ||
+                searchParams.get("middle_category_id") ||
                 searchParams.get("category_id") ||
                 searchParams.get("industries") ||
                 searchParams.get("countries") ||
@@ -89,6 +138,7 @@ export function SearchBar() {
                 setShowFilters(false);
               }
             }}
+            onFiltersReady={setCurrentFilters}
           />
         </div>
       )}

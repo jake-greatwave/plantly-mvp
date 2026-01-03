@@ -11,12 +11,7 @@ interface CompanyHeroProps {
 }
 
 export function CompanyHero({ company, brandColor }: CompanyHeroProps) {
-  const mainImage =
-    company.company_images?.find((img) => img.image_type === "main")
-      ?.image_url ||
-    company.company_images?.sort((a, b) => a.display_order - b.display_order)[0]
-      ?.image_url ||
-    company.logo_url;
+  const mainImage = company.company_images?.find((img) => img.image_type === "main")?.image_url;
 
   const categories =
     company.company_categories
@@ -31,7 +26,8 @@ export function CompanyHero({ company, brandColor }: CompanyHeroProps) {
             src={mainImage}
             alt={company.company_name}
             fill
-            className="object-cover opacity-30"
+            className="object-cover"
+            priority
             unoptimized
           />
         </div>
@@ -41,7 +37,7 @@ export function CompanyHero({ company, brandColor }: CompanyHeroProps) {
         </div>
       )}
 
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
       <div className="relative z-10 h-full flex items-end">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-8">

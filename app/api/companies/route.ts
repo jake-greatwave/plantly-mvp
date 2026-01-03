@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1", 10);
     const limit = parseInt(searchParams.get("limit") || String(ITEMS_PER_PAGE), 10);
     const categoryId = searchParams.get("category_id");
+    const middleCategoryId = searchParams.get("middle_category_id");
     const parentCategoryId = searchParams.get("parent_category_id");
     const regionId = searchParams.get("region_id");
     const countries = searchParams.get("countries")?.split(",").filter(Boolean) || [];
@@ -23,54 +24,55 @@ export async function GET(request: NextRequest) {
 
     let companyIds: string[] | null = null;
 
-    if (parentCategoryId) {
-      const { data: categoryData } = await supabase
-        .from("company_categories")
-        .select("company_id")
-        .eq("category_id", parentCategoryId);
+    const selectedCategoryIds: string[] = [];
+    if (parentCategoryId) selectedCategoryIds.push(parentCategoryId);
+    if (middleCategoryId) selectedCategoryIds.push(middleCategoryId);
+    if (categoryId) selectedCategoryIds.push(categoryId);
 
-      if (categoryData && categoryData.length > 0) {
-        companyIds = categoryData.map((item) => item.company_id);
-      } else {
-        return NextResponse.json({
-          companies: [],
-          pagination: {
-            page: 1,
-            limit,
-            total: 0,
-            totalPages: 0,
-            hasNextPage: false,
-            hasPrevPage: false,
-          },
-        });
-      }
-    }
+    if (selectedCategoryIds.length > 0) {
+      const categoryCompanyIdSets: Set<string>[] = [];
 
-    if (categoryId) {
-      const { data: categoryData } = await supabase
-        .from("company_categories")
-        .select("company_id")
-        .eq("category_id", categoryId);
+      for (const catId of selectedCategoryIds) {
+        const { data: categoryData } = await supabase
+          .from("company_categories")
+          .select("company_id")
+          .eq("category_id", catId);
 
-      if (categoryData && categoryData.length > 0) {
-        const categoryCompanyIds = categoryData.map((item) => item.company_id);
-        if (companyIds) {
-          companyIds = companyIds.filter((id) => categoryCompanyIds.includes(id));
+        if (categoryData && categoryData.length > 0) {
+          categoryCompanyIdSets.push(new Set(categoryData.map((item) => item.company_id)));
         } else {
-          companyIds = categoryCompanyIds;
+          return NextResponse.json({
+            companies: [],
+            pagination: {
+              page: 1,
+              limit,
+              total: 0,
+              totalPages: 0,
+              hasNextPage: false,
+              hasPrevPage: false,
+            },
+          });
         }
-      } else {
-        return NextResponse.json({
-          companies: [],
-          pagination: {
-            page: 1,
-            limit,
-            total: 0,
-            totalPages: 0,
-            hasNextPage: false,
-            hasPrevPage: false,
-          },
-        });
+      }
+
+      if (categoryCompanyIdSets.length > 0) {
+        companyIds = Array.from(categoryCompanyIdSets[0]).filter((companyId) =>
+          categoryCompanyIdSets.every((set) => set.has(companyId))
+        );
+
+        if (companyIds.length === 0) {
+          return NextResponse.json({
+            companies: [],
+            pagination: {
+              page: 1,
+              limit,
+              total: 0,
+              totalPages: 0,
+              hasNextPage: false,
+              hasPrevPage: false,
+            },
+          });
+        }
       }
     }
 
@@ -204,15 +206,15 @@ export async function GET(request: NextRequest) {
         company_tags(*)
       `,
         { count: "exact" }
-      )
-      .eq("is_verified", true);
+      );
 
-    if (companyIds) {
+    if (companyIds && companyIds.length > 0) {
       query = query.in("id", companyIds);
     }
 
     if (search) {
-      const searchTerm = `%${search}%`;
+      const escapedSearch = search.replace(/[%_\\]/g, "\\$&");
+      const searchTerm = `%${escapedSearch}%`;
       
       const { data: categoryMatches } = await supabase
         .from("categories")
@@ -248,21 +250,36 @@ export async function GET(request: NextRequest) {
       }
       tagCompanyIds.forEach((id) => allSearchCompanyIds.add(id));
 
-      const searchConditions = [
-        `company_name.ilike.${searchTerm}`,
-        `intro_title.ilike.${searchTerm}`,
-        `intro_content.ilike.${searchTerm}`,
-        `project_title.ilike.${searchTerm}`,
-        `achievements.ilike.${searchTerm}`,
-        `partners.ilike.${searchTerm}`,
-      ];
-
+      const searchConditions: string[] = [];
+      
       if (allSearchCompanyIds.size > 0) {
         const idsArray = Array.from(allSearchCompanyIds);
         searchConditions.push(`id.in.(${idsArray.join(",")})`);
       }
 
-      query = query.or(searchConditions.join(","));
+      const textFields = [
+        "company_name",
+        "intro_title",
+        "intro_content",
+        "project_title",
+        "achievements",
+        "partners",
+      ];
+
+      const escapedSearchTerm = searchTerm
+        .replace(/\\/g, "\\\\")
+        .replace(/,/g, "\\,")
+        .replace(/\(/g, "\\(")
+        .replace(/\)/g, "\\)")
+        .replace(/\./g, "\\.");
+
+      for (const field of textFields) {
+        searchConditions.push(`${field}.ilike.${escapedSearchTerm}`);
+      }
+
+      if (searchConditions.length > 0) {
+        query = query.or(searchConditions.join(","));
+      }
     }
 
     if (isVerified === "true") {
@@ -364,6 +381,7 @@ export async function POST(request: NextRequest) {
         as_info: body.as_info,
         pricing_type: body.pricing_type,
         brand_color: body.brand_color,
+        content: body.content || null,
         is_verified: false,
         is_featured: false,
         view_count: 0,
@@ -389,12 +407,21 @@ export async function POST(request: NextRequest) {
 
     const companyId = company.id;
 
+    if (body.main_image) {
+      await supabase.from("company_images").insert({
+        company_id: companyId,
+        image_url: body.main_image,
+        image_type: "main" as const,
+        display_order: 0,
+      });
+    }
+
     if (body.images && body.images.length > 0) {
       const imageInserts = body.images.map((url: string, index: number) => ({
         company_id: companyId,
         image_url: url,
         image_type: "portfolio" as const,
-        display_order: index,
+        display_order: index + 1,
       }));
 
       await supabase.from("company_images").insert(imageInserts);
@@ -404,6 +431,10 @@ export async function POST(request: NextRequest) {
 
     if (body.parent_category) {
       categoryIds.push(body.parent_category);
+    }
+
+    if (body.middle_category) {
+      categoryIds.push(body.middle_category);
     }
 
     if (body.category_ids && body.category_ids.length > 0) {
@@ -419,28 +450,44 @@ export async function POST(request: NextRequest) {
       await supabase.from("company_categories").insert(categoryInserts);
     }
 
-    if (body.countries && body.countries.length > 0) {
-      const { data: regions } = await supabase
-        .from("regions")
-        .select("id, region_name")
-        .eq("region_type", "country")
-        .in("region_name", body.countries);
+    if (body.countries && Array.isArray(body.countries)) {
+      if (body.countries.length > 0) {
+        const { data: regions, error: regionsError } = await supabase
+          .from("regions")
+          .select("id, region_name")
+          .eq("region_type", "country")
+          .in("region_name", body.countries);
 
-      if (regions && regions.length > 0) {
-        const regionMap = new Map(
-          regions.map((r) => [r.region_name, r.id])
-        );
+        if (regionsError) {
+          console.error("Regions query error:", regionsError);
+        }
 
-        const countryInserts = body.countries
-          .filter((country: string) => regionMap.has(country))
-          .map((country: string) => ({
-            company_id: companyId,
-            region_id: regionMap.get(country),
-            region_type: "country" as const,
-          }));
+        if (regions && regions.length > 0) {
+          const regionMap = new Map(
+            regions.map((r) => [r.region_name, r.id])
+          );
 
-        if (countryInserts.length > 0) {
-          await supabase.from("company_regions").insert(countryInserts);
+          const countryInserts = body.countries
+            .filter((country: string) => regionMap.has(country))
+            .map((country: string) => ({
+              company_id: companyId,
+              region_id: regionMap.get(country),
+              region_type: "country" as const,
+            }));
+
+          if (countryInserts.length > 0) {
+            const { error: insertError } = await supabase
+              .from("company_regions")
+              .insert(countryInserts);
+
+            if (insertError) {
+              console.error("Company regions insert error:", insertError);
+            }
+          } else {
+            console.warn("No valid countries found in regions table:", body.countries);
+          }
+        } else {
+          console.warn("No regions found for countries:", body.countries);
         }
       }
     }

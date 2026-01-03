@@ -67,7 +67,7 @@ export const ReferenceSection = memo(function ReferenceSection({ data, onFieldCh
             maxFiles={isAdmin ? Infinity : limits.maxImages}
           />
         ) : (
-          <UpgradePrompt feature="상세 이미지" variant="overlay" onUpgradeSuccess={onUpgradeSuccess}>
+          <UpgradePrompt feature="상세 이미지" upgradeSource="상세 이미지" variant="overlay" onUpgradeSuccess={onUpgradeSuccess}>
             <FileUploadField
               value={data.images || []}
               onChange={(value) => onFieldChange('images', value)}
@@ -89,7 +89,7 @@ export const ReferenceSection = memo(function ReferenceSection({ data, onFieldCh
             placeholder="https://www.youtube.com/watch?v=..."
           />
         ) : (
-          <UpgradePrompt feature="동영상 링크" variant="overlay" onUpgradeSuccess={onUpgradeSuccess}>
+          <UpgradePrompt feature="동영상 링크" upgradeSource="동영상 링크" variant="overlay" onUpgradeSuccess={onUpgradeSuccess}>
             <Input
               id="video_url"
               type="url"

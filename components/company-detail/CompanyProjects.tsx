@@ -17,24 +17,19 @@ export function CompanyProjects({ company, brandColor }: CompanyProjectsProps) {
   }
 
   return (
-    <Card className="p-6">
-      <h2
-        className="text-2xl font-bold mb-6"
+    <Card className="p-4">
+      <h3
+        className="text-lg font-semibold mb-4"
         style={{ color: brandColor }}
       >
         프로젝트 & 성과
-      </h2>
+      </h3>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {company.project_title && (
           <div>
-            <h3
-              className="text-lg font-semibold mb-2"
-              style={{ color: brandColor }}
-            >
-              주요 프로젝트
-            </h3>
-            <p className="text-gray-700 leading-relaxed">
+            <h4 className="text-sm font-medium text-gray-600 mb-1.5">주요 프로젝트</h4>
+            <p className="text-sm text-gray-700 leading-relaxed line-clamp-2">
               {company.project_title}
             </p>
           </div>
@@ -42,13 +37,8 @@ export function CompanyProjects({ company, brandColor }: CompanyProjectsProps) {
 
         {company.achievements && (
           <div>
-            <h3
-              className="text-lg font-semibold mb-2"
-              style={{ color: brandColor }}
-            >
-              주요 성과
-            </h3>
-            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+            <h4 className="text-sm font-medium text-gray-600 mb-1.5">주요 성과</h4>
+            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap line-clamp-3">
               {company.achievements}
             </p>
           </div>
@@ -56,13 +46,8 @@ export function CompanyProjects({ company, brandColor }: CompanyProjectsProps) {
 
         {company.partners && (
           <div>
-            <h3
-              className="text-lg font-semibold mb-2"
-              style={{ color: brandColor }}
-            >
-              주요 파트너
-            </h3>
-            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+            <h4 className="text-sm font-medium text-gray-600 mb-1.5">주요 파트너</h4>
+            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap line-clamp-2">
               {company.partners}
             </p>
           </div>

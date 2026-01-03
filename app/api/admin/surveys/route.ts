@@ -47,9 +47,14 @@ export async function GET() {
     }
 
     const featureStats: Record<string, number> = {}
+    const upgradeSourceStats: Record<string, number> = {}
     surveys?.forEach(survey => {
       if (survey.feature_used) {
         featureStats[survey.feature_used] = (featureStats[survey.feature_used] || 0) + 1
+      }
+      const source = survey.upgrade_source || survey.feature_used
+      if (source) {
+        upgradeSourceStats[source] = (upgradeSourceStats[source] || 0) + 1
       }
     })
 
@@ -67,6 +72,7 @@ export async function GET() {
         q2: q2Stats,
         q3: q3Stats,
         features: featureStats,
+        upgradeSources: upgradeSourceStats,
         dates: dateStats,
       },
     })

@@ -8,6 +8,7 @@ export interface UpgradeSurvey {
   id: string
   user_id: string
   feature_used: string | null
+  upgrade_source: string | null
   q1_needs: SurveyQ1Needs
   q2_price: SurveyQ2Price
   q3_wtp: SurveyQ3WTP
@@ -17,6 +18,7 @@ export interface UpgradeSurvey {
 
 export interface UpgradeSurveyRequest {
   feature_used?: string
+  upgrade_source?: string
   q1_needs: SurveyQ1Needs
   q2_price: SurveyQ2Price
   q3_wtp: SurveyQ3WTP

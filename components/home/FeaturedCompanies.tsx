@@ -28,18 +28,27 @@ export async function FeaturedCompanies() {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {featuredCompanies.map((company: any) => (
-            <CompanyCard
-              key={company.id}
-              id={company.id}
-              name={company.company_name}
-              logoUrl={company.logo_url}
-              description={company.intro_title}
-              location={company.address}
-              tags={company.company_tags}
-              categories={company.company_categories}
-            />
-          ))}
+          {featuredCompanies.map((company: any) => {
+            const mainImage = company.company_images?.find((img: any) => img.image_type === 'main')?.image_url || null
+            
+            return (
+              <CompanyCard
+                key={company.id}
+                id={company.id}
+                name={company.company_name}
+                mainImage={mainImage}
+                logoUrl={company.logo_url}
+                description={company.intro_title}
+                location={company.address}
+                tags={company.company_tags}
+                categories={company.company_categories}
+                isVerified={company.is_verified}
+                isFeatured={company.is_featured}
+                ceoName={company.ceo_name}
+                industries={company.industries}
+              />
+            )
+          })}
         </div>
       </div>
     </section>

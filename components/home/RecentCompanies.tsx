@@ -41,6 +41,18 @@ function RecentCompanyCard({ company }: RecentCompanyCardProps) {
       ?.map((cc) => cc.categories?.category_name)
       .filter(Boolean) || [];
 
+  const industries = company.industries
+    ? (typeof company.industries === "string"
+        ? JSON.parse(company.industries)
+        : company.industries)
+    : null;
+
+  const industryList = Array.isArray(industries)
+    ? industries
+    : typeof industries === "object" && industries !== null
+    ? Object.values(industries)
+    : [];
+
   const handleClick = () => {
     router.push(`/companies/${company.id}`);
   };
@@ -48,57 +60,85 @@ function RecentCompanyCard({ company }: RecentCompanyCardProps) {
   return (
     <Card
       onClick={handleClick}
-      className="bg-white border-gray-200 overflow-hidden hover:border-blue-600 hover:shadow-md transition-all cursor-pointer h-full flex flex-col"
+      className="bg-white border-gray-200 overflow-hidden hover:border-blue-600 hover:shadow-lg transition-all cursor-pointer"
     >
-      <div className="relative w-full h-20 bg-gray-100 overflow-hidden">
-        {mainImage ? (
-          <img
-            src={mainImage}
-            alt={company.company_name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Building2 className="w-6 h-6 text-gray-400" />
-          </div>
-        )}
-        <div className="absolute top-0.5 right-0.5 flex gap-0.5">
+      <div className="flex">
+        <div className="relative w-40 h-40 flex-shrink-0 bg-gray-100 overflow-hidden">
+          {mainImage ? (
+            <img
+              src={mainImage}
+              alt={company.company_name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+              <Building2 className="w-12 h-12 text-gray-400" />
+            </div>
+          )}
           {company.is_featured && (
-            <Badge className="bg-yellow-500 text-white text-[9px] px-0.5 py-0 h-3.5 leading-none">
-              <Star className="w-1.5 h-1.5" />
-            </Badge>
+            <div className="absolute top-2 right-2">
+              <Badge className="bg-yellow-500 text-white text-sm px-2 py-1">
+                <Star className="w-3 h-3 mr-1" />
+                추천
+              </Badge>
+            </div>
           )}
         </div>
-      </div>
 
-      <div className="p-2 flex-1 flex flex-col min-h-0">
-        <h3 className="text-gray-900 font-semibold text-sm mb-1 line-clamp-1 leading-tight">
-          {company.company_name}
-        </h3>
+        <div className="p-4 flex-1 flex flex-col min-w-0">
+          <h3 className="text-base font-semibold text-gray-900 mb-1.5 line-clamp-1">
+            {company.company_name}
+          </h3>
 
-        {company.intro_title && (
-          <p className="text-gray-600 text-xs mb-1.5 line-clamp-1 leading-tight overflow-hidden text-ellipsis">
-            {company.intro_title}
-          </p>
-        )}
+          {company.intro_title && (
+            <p className="text-gray-700 text-sm mb-2.5 line-clamp-2">
+              {company.intro_title}
+            </p>
+          )}
 
-        {company.address && (
-          <div className="flex items-center gap-1 mb-1.5 text-[10px] text-gray-500">
-            <MapPin className="w-3 h-3 shrink-0" />
-            <span className="line-clamp-1">{formatAddressShort(company.address)}</span>
+          <div className="space-y-1.5 mb-2.5 flex-1">
+            {company.ceo_name && (
+              <p className="text-sm text-gray-600">
+                대표: {company.ceo_name}
+              </p>
+            )}
+            {company.address && (
+              <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <span className="line-clamp-1">{formatAddressShort(company.address)}</span>
+              </div>
+            )}
+            {industryList.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {industryList.slice(0, 2).map((industry: any, index: number) => (
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className="bg-blue-50 text-blue-700 text-sm px-2 py-0.5"
+                  >
+                    {String(industry)}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
-        )}
 
-        {categories.length > 0 && (
-          <div className="mt-auto pt-0.5">
-            <Badge
-              variant="outline"
-              className="text-[10px] border-gray-300 text-gray-600 px-1 py-0 h-3.5 leading-none"
-            >
-              {categories[0]}
-            </Badge>
-          </div>
-        )}
+          {categories.length > 0 && (
+            <div className="pt-2.5 border-t border-gray-200">
+              <div className="flex flex-wrap gap-1.5">
+                {categories.slice(0, 2).map((category, index) => (
+                  <Badge
+                    key={index}
+                    variant="outline"
+                    className="text-sm border-gray-300 text-gray-600 px-2 py-0.5"
+                  >
+                    {category}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </Card>
   );
@@ -165,7 +205,7 @@ export function RecentCompanies() {
     <section className="bg-white py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-gray-900 mb-6 text-center text-2xl font-bold">최근 등록 기업</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {companies.map((company) => (
             <RecentCompanyCard key={company.id} company={company} />
           ))}

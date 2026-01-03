@@ -1,9 +1,7 @@
 import { CompanyHero } from "./CompanyHero";
-import { CompanyInfo } from "./CompanyInfo";
-import { CompanyPortfolio } from "./CompanyPortfolio";
-import { CompanyTechnical } from "./CompanyTechnical";
-import { CompanyProjects } from "./CompanyProjects";
-import { CompanyContact } from "./CompanyContact";
+import { CompanyOverview } from "./CompanyOverview";
+import { CompanyContent } from "./CompanyContent";
+import { CompanyImageGallery } from "./CompanyImageGallery";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/utils/auth";
 import { getGradientBackground } from "@/lib/utils/color";
@@ -51,6 +49,7 @@ async function fetchCompany(id: string): Promise<CompanyDetail | null> {
         as_info,
         pricing_type,
         brand_color,
+        content,
         is_verified,
         is_featured,
         view_count,
@@ -120,18 +119,10 @@ export async function CompanyDetailContent({
     <div className="min-h-screen" style={{ background: gradientBackground }}>
       <CompanyHero company={company} brandColor={brandColor} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            <CompanyPortfolio company={company} />
-            <CompanyTechnical company={company} brandColor={brandColor} />
-            <CompanyProjects company={company} brandColor={brandColor} />
-          </div>
-          <div className="lg:col-span-1">
-            <div className="sticky top-4 space-y-6">
-              <CompanyInfo company={company} brandColor={brandColor} />
-              <CompanyContact company={company} brandColor={brandColor} />
-            </div>
-          </div>
+        <div className="space-y-8">
+          <CompanyOverview company={company} brandColor={brandColor} />
+          <CompanyContent company={company} />
+          <CompanyImageGallery company={company} />
         </div>
       </div>
     </div>

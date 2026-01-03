@@ -6,17 +6,21 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
+import { MainImageSection } from './MainImageSection'
 import { BasicInfoSection } from './BasicInfoSection'
 import { CategorySection } from './CategorySection'
 import { TechnicalSpecSection } from './TechnicalSpecSection'
 import { ReferenceSection } from './ReferenceSection'
 import { TradingConditionSection } from './TradingConditionSection'
 import { BrandingSection } from './BrandingSection'
+import { ContentSection } from './ContentSection'
 import type { CompanyFormData } from '@/lib/types/company-form.types'
 
 const DEFAULT_FORM_DATA: Partial<CompanyFormData> = {
+  main_image: '',
   brand_color: '#3B82F6',
   parent_category: '',
+  middle_category: '',
   category_ids: [],
   industries: [],
   equipment_list: [],
@@ -25,6 +29,7 @@ const DEFAULT_FORM_DATA: Partial<CompanyFormData> = {
   images: [],
   countries: [],
   pricing_type: '',
+  content: '',
 }
 
 interface CompanyRegisterFormProps {
@@ -74,6 +79,7 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
             ...DEFAULT_FORM_DATA,
             ...parsed,
             parent_category: parsed.parent_category ? String(parsed.parent_category) : '',
+            middle_category: parsed.middle_category ? String(parsed.middle_category) : '',
             category_ids: Array.isArray(parsed.category_ids) ? parsed.category_ids.map(String) : [],
             pricing_type: parsed.pricing_type ? String(parsed.pricing_type) : '',
           }
@@ -102,14 +108,22 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
 
       if (response.ok && result.success) {
         const company = result.data
-        const imageUrls = company.company_images?.map((img: any) => img.image_url) || []
+        const mainImage = company.company_images?.find((img: any) => img.image_type === 'main')?.image_url || ''
+        const imageUrls = company.company_images?.filter((img: any) => img.image_type !== 'main').map((img: any) => img.image_url) || []
         
         const parentCategory = company.company_categories?.find(
           (cc: any) => cc.categories?.parent_id === null
         )?.category_id
         
+        const middleCategory = company.company_categories?.find(
+          (cc: any) => cc.categories?.parent_id === parentCategory
+        )?.category_id
+        
         const subCategoryIds = company.company_categories
-          ?.filter((cc: any) => cc.categories?.parent_id !== null)
+          ?.filter((cc: any) => {
+            const parentId = cc.categories?.parent_id
+            return parentId && parentId !== parentCategory && parentId === middleCategory
+          })
           .map((cc: any) => cc.category_id) || []
         
         const fullAddress = company.address || ''
@@ -121,6 +135,7 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
         }
 
         const loadedData = {
+          main_image: mainImage,
           company_name: company.company_name,
           business_number: company.business_number,
           intro_title: company.intro_title,
@@ -133,6 +148,7 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
           address: mainAddress,
           address_detail: addressDetail,
           parent_category: parentCategory || '',
+          middle_category: middleCategory || '',
           category_ids: subCategoryIds,
           industries: company.industries || [],
           equipment_list: company.equipment || [],
@@ -149,6 +165,7 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
           as_info: company.as_info || '',
           pricing_type: company.pricing_type || '',
           brand_color: company.brand_color || '#3B82F6',
+          content: company.content || '',
         }
         setFormData(loadedData)
         formDataRef.current = loadedData
@@ -200,6 +217,9 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
   }
 
   const validateForm = (): { isValid: boolean; errorField?: string; section?: 'basic' | 'category' } => {
+    if (!formData.main_image) {
+      return { isValid: false, errorField: '대표 이미지', section: 'basic' }
+    }
     if (!formData.company_name) {
       return { isValid: false, errorField: '기업명', section: 'basic' }
     }
@@ -214,6 +234,15 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
     }
     if (!formData.address_detail) {
       return { isValid: false, errorField: '상세주소', section: 'basic' }
+    }
+    if (!formData.parent_category) {
+      return { isValid: false, errorField: '대분류', section: 'category' }
+    }
+    if (!formData.middle_category) {
+      return { isValid: false, errorField: '중분류', section: 'category' }
+    }
+    if (!formData.category_ids || formData.category_ids.length === 0) {
+      return { isValid: false, errorField: '소분류', section: 'category' }
     }
     return { isValid: true }
   }
@@ -351,6 +380,8 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
           <BasicInfoSection data={formData} onFieldChange={handleFieldChange} onVerificationChange={setIsBusinessNumberVerified} />
         </div>
         <Separator />
+        <MainImageSection data={formData} onFieldChange={handleFieldChange} />
+        <Separator />
         <div ref={categoryRef}>
           <CategorySection 
             data={formData} 
@@ -382,6 +413,8 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
           isAdmin={isAdmin}
           onUpgradeSuccess={refreshUserInfo}
         />
+        <Separator />
+        <ContentSection data={formData} onFieldChange={handleFieldChange} />
       </Card>
 
       <div className="flex gap-3 mt-6 sticky bottom-4 bg-white p-4 rounded-lg border border-gray-200 shadow-lg z-10">

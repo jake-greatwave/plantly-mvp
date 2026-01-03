@@ -1,4 +1,5 @@
 export interface CompanyFormData {
+  main_image: string;
   company_name: string;
   business_number: string;
   intro_title: string;
@@ -12,6 +13,7 @@ export interface CompanyFormData {
   address_detail: string;
 
   parent_category: string;
+  middle_category: string;
   category_ids: string[];
   industries: string[];
 
@@ -32,6 +34,7 @@ export interface CompanyFormData {
   pricing_type: string;
 
   brand_color: string;
+  content: string;
 }
 
 export const TRL_LEVELS = [
