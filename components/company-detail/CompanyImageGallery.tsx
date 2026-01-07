@@ -1,9 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import { Card } from '@/components/ui/card'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import type { CompanyDetail } from '@/lib/types/company-detail.types'
 
 interface CompanyImageGalleryProps {
@@ -25,39 +24,37 @@ export function CompanyImageGallery({ company }: CompanyImageGalleryProps) {
     <>
       <Card className="p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">상세 이미지</h2>
-        <div className="overflow-hidden rounded-lg">
+        <div className="space-y-4">
           {portfolioImages.map((image, index) => (
             <div
               key={image.id}
               onClick={() => setSelectedImage(image.image_url)}
-              className={`relative w-full aspect-video bg-gray-100 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity ${
-                index === 0 ? 'rounded-t-lg' : ''
-              } ${
-                index === portfolioImages.length - 1 ? 'rounded-b-lg' : ''
-              }`}
+              className="relative w-full max-w-full bg-gray-100 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity rounded-lg"
             >
-              <Image
-                src={image.image_url}
-                alt={`${company.company_name} 상세 이미지`}
-                fill
-                className="object-contain"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                unoptimized
-              />
+              <div className="relative w-full" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                <img
+                  src={image.image_url}
+                  alt={`${company.company_name} 상세 이미지 ${index + 1}`}
+                  className="w-full h-auto object-contain"
+                  style={{ display: 'block' }}
+                />
+              </div>
             </div>
           ))}
         </div>
       </Card>
       <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
-        <DialogContent className="max-w-5xl p-0">
+        <DialogContent className="max-w-[1200px] p-0 max-h-[90vh] overflow-y-auto">
+          <DialogTitle className="sr-only">
+            {company.company_name} 상세 이미지
+          </DialogTitle>
           {selectedImage && (
-            <div className="relative w-full aspect-video bg-black">
-              <Image
+            <div className="relative w-full bg-black flex items-center justify-center">
+              <img
                 src={selectedImage}
                 alt={`${company.company_name} 상세 이미지`}
-                fill
-                className="object-contain"
-                unoptimized
+                className="w-full h-auto object-contain"
+                style={{ display: 'block', maxWidth: '100%' }}
               />
             </div>
           )}
