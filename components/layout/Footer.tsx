@@ -27,7 +27,7 @@ export function Footer() {
             {/* 대표자 */}
             <div className="flex items-center gap-1.5">
               <User className="w-3.5 h-3.5 flex-shrink-0" />
-              <span>대표: 사재헌</span>
+              <span>대표 사재헌</span>
             </div>
             <span className="text-gray-500">|</span>
 
@@ -58,7 +58,7 @@ export function Footer() {
             {/* 위치 */}
             <div className="flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
-              <span>경기도 화성시 동탄순환대로 8길 27</span>
+              <span>경기도 오산시 대호로 135, 에스아이프라자 802호</span>
             </div>
           </div>
         </div>
