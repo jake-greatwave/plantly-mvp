@@ -17,6 +17,10 @@ export function CompanyHero({ company, brandColor }: CompanyHeroProps) {
     company.company_categories
       ?.map((cc) => cc.categories?.category_name)
       .filter(Boolean) || [];
+  
+  const tags = company.company_tags?.map((tag) => tag.tag_name) || [];
+  
+  const allTags = [...categories, ...tags];
 
   return (
     <div className="relative w-full h-96 overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
@@ -73,15 +77,15 @@ export function CompanyHero({ company, brandColor }: CompanyHeroProps) {
                   {company.intro_title}
                 </p>
               )}
-              {categories.length > 0 && (
+              {allTags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {categories.slice(0, 3).map((category, index) => (
+                  {allTags.map((tag, index) => (
                     <Badge
                       key={index}
                       variant="secondary"
                       className="bg-white/20 text-white border-white/30 backdrop-blur-sm"
                     >
-                      {category}
+                      {tag}
                     </Badge>
                   ))}
                 </div>

@@ -190,8 +190,8 @@ export const CategorySection = memo(function CategorySection({
       })
       .filter((cat): cat is { id: string; name: string; isCustom: boolean } => cat !== null);
     
-    const customCategoriesList = customCategories.map((name, index) => ({
-      id: `custom-${index}-${name}`,
+    const customCategoriesList = customCategories.map((name) => ({
+      id: `custom-${name}`,
       name,
       isCustom: true,
     }));
@@ -224,8 +224,8 @@ export const CategorySection = memo(function CategorySection({
   const handleRemoveCategory = useCallback(
     (categoryId: string) => {
       if (categoryId.startsWith("custom-")) {
-        const index = parseInt(categoryId.split("-")[1] || "0", 10);
-        const newCustomCategories = customCategories.filter((_, i) => i !== index);
+        const categoryName = categoryId.replace("custom-", "");
+        const newCustomCategories = customCategories.filter((name) => name !== categoryName);
         onFieldChange("custom_categories", newCustomCategories);
       } else {
         onFieldChange(

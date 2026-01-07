@@ -312,12 +312,19 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
       const url = companyId ? `/api/companies/${companyId}` : '/api/companies'
       const method = companyId ? 'PUT' : 'POST'
 
+      const dataToSubmit = formDataRef.current
+
+      console.log('Submitting data:', {
+        category_ids: dataToSubmit.category_ids,
+        custom_categories: dataToSubmit.custom_categories,
+      })
+
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSubmit),
       })
 
       const data = await response.json()

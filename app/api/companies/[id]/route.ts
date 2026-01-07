@@ -57,7 +57,8 @@ export async function GET(request: Request, { params }: RouteParams) {
         updated_at,
         company_images(id, image_url, image_type, display_order),
         company_categories(category_id, categories(id, parent_id, category_name)),
-        company_regions(region_id, regions(id, region_name, region_type))
+        company_regions(region_id, regions(id, region_name, region_type)),
+        company_tags(id, tag_name)
       `)
       .eq('id', id)
 
@@ -135,7 +136,11 @@ export async function PUT(request: Request, { params }: RouteParams) {
     const body = await request.json()
     const supabase = await createClient()
 
-    console.log('PUT request body.countries:', body.countries)
+    console.log('PUT request body:', {
+      category_ids: body.category_ids,
+      custom_categories: body.custom_categories,
+      countries: body.countries,
+    })
 
     const fullAddress = body.address
       ? body.address_detail
