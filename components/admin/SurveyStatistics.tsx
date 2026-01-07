@@ -207,16 +207,16 @@ export function SurveyStatistics() {
 
       <Card className="p-6">
         <h2 className="text-lg font-semibold mb-4">전체 응답 목록</h2>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-auto max-h-[600px] border border-gray-200 rounded-lg">
           <table className="w-full text-sm">
-            <thead>
+            <thead className="sticky top-0 bg-white border-b z-10">
               <tr className="border-b">
-                <th className="text-left p-2">날짜</th>
-                <th className="text-left p-2">업그레이드 포인트</th>
-                <th className="text-left p-2">Q1</th>
-                <th className="text-left p-2">Q2</th>
-                <th className="text-left p-2">Q3</th>
-                <th className="text-left p-2">의견</th>
+                <th className="text-left p-2 bg-white">날짜</th>
+                <th className="text-left p-2 bg-white">업그레이드 포인트</th>
+                <th className="text-left p-2 bg-white">Q1</th>
+                <th className="text-left p-2 bg-white">Q2</th>
+                <th className="text-left p-2 bg-white">Q3</th>
+                <th className="text-left p-2 bg-white">의견</th>
               </tr>
             </thead>
             <tbody>
