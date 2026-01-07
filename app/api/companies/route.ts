@@ -427,27 +427,22 @@ export async function POST(request: NextRequest) {
       await supabase.from("company_images").insert(imageInserts);
     }
 
-    const categoryIds: string[] = [];
-
-    if (body.parent_category) {
-      categoryIds.push(body.parent_category);
-    }
-
-    if (body.middle_category) {
-      categoryIds.push(body.middle_category);
-    }
-
     if (body.category_ids && body.category_ids.length > 0) {
-      categoryIds.push(...body.category_ids);
-    }
-
-    if (categoryIds.length > 0) {
-      const categoryInserts = categoryIds.map((catId: string) => ({
+      const categoryInserts = body.category_ids.map((catId: string) => ({
         company_id: companyId,
         category_id: catId,
       }));
 
       await supabase.from("company_categories").insert(categoryInserts);
+    }
+
+    if (body.custom_categories && Array.isArray(body.custom_categories) && body.custom_categories.length > 0) {
+      const tagInserts = body.custom_categories.map((tagName: string) => ({
+        company_id: companyId,
+        tag_name: tagName.trim(),
+      }));
+
+      await supabase.from("company_tags").insert(tagInserts);
     }
 
     if (body.countries && Array.isArray(body.countries)) {

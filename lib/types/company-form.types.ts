@@ -15,6 +15,7 @@ export interface CompanyFormData {
   parent_category: string;
   middle_category: string;
   category_ids: string[];
+  custom_categories: string[];
   industries: string[];
 
   equipment_list: string[];

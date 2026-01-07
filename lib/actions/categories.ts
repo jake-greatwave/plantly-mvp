@@ -69,6 +69,20 @@ export async function getCategoryById(id: string) {
   return data
 }
 
+export async function getCategoriesByIds(ids: string[]) {
+  if (ids.length === 0) return []
+  
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('categories')
+    .select('*')
+    .in('id', ids)
+    .eq('is_active', true)
+
+  if (error) throw error
+  return data || []
+}
+
 
 
 

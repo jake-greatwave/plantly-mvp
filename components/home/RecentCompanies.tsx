@@ -63,15 +63,15 @@ function RecentCompanyCard({ company }: RecentCompanyCardProps) {
       className="bg-white border-gray-200 overflow-hidden hover:border-blue-600 hover:shadow-lg transition-all cursor-pointer"
     >
       <div className="flex">
-        <div className="relative w-40 h-40 flex-shrink-0 bg-gray-100 overflow-hidden">
+        <div className="relative w-40 h-40 flex-shrink-0 bg-white overflow-hidden p-3">
           {mainImage ? (
             <img
               src={mainImage}
               alt={company.company_name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover rounded"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 rounded">
               <Building2 className="w-12 h-12 text-gray-400" />
             </div>
           )}
@@ -97,11 +97,6 @@ function RecentCompanyCard({ company }: RecentCompanyCardProps) {
           )}
 
           <div className="space-y-1.5 mb-2.5 flex-1">
-            {company.ceo_name && (
-              <p className="text-sm text-gray-600">
-                대표: {company.ceo_name}
-              </p>
-            )}
             {company.address && (
               <div className="flex items-center gap-1.5 text-sm text-gray-600">
                 <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />

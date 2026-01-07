@@ -50,15 +50,15 @@ export function MyCompanyCard({ company, onDelete }: MyCompanyCardProps) {
       onClick={handlePreview}
     >
       <div className="flex flex-col h-full">
-        <div className="relative h-80 bg-gray-100 overflow-hidden">
+        <div className="relative h-80 bg-white overflow-hidden p-4">
           {mainImage ? (
             <img 
               src={mainImage} 
               alt={company.company_name} 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover rounded"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 rounded">
               <Building2 className="w-16 h-16 text-gray-400" />
             </div>
           )}
