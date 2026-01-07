@@ -26,8 +26,9 @@ export const DetailImageSection = memo(function DetailImageSection({
   const limits = getEffectiveLimits(userGrade, isAdmin);
   const currentImageCount = (data.images || []).length;
   const isBasicGrade = userGrade === "basic" && !isAdmin;
-  const freeImageLimit = 2;
-  const canUploadMore = isAdmin || userGrade === "enterprise" || userGrade === "enterprise_trial";
+  const freeImageLimit = 1;
+  const canUploadMore =
+    isAdmin || userGrade === "enterprise" || userGrade === "enterprise_trial";
   const needsUpgrade = isBasicGrade && currentImageCount >= freeImageLimit;
 
   const maxFiles = useMemo(() => {
@@ -43,16 +44,25 @@ export const DetailImageSection = memo(function DetailImageSection({
       </div>
 
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-gray-900">[안내 가이드]</p>
-          <p className="text-sm text-gray-700 leading-relaxed">
-            네이버나 쿠팡에서 물건을 살 때, 아래로 쭉 내려보며 읽던 긴 설명 이미지를 보신 적 있나요? 그게 바로 '상세페이지'입니다.
+        <div>
+          <p className="text-sm font-medium text-gray-900 mb-1">
+            [안내 가이드]
           </p>
-          <p className="text-sm text-gray-700 leading-relaxed">
-            우리 회사의 기술력, 보유 설비, 공정 과정을 담은 '온라인용 카탈로그'라고 생각하시면 됩니다.
+          <p className="text-sm text-gray-700 leading-tight mb-0.5">
+            네이버나 쿠팡에서 물건을 살 때, 아래로 쭉 내려보며 읽던 긴 설명
+            이미지를 보신 적 있나요? 그게 바로 '상세페이지'입니다.
           </p>
-          <p className="text-sm text-gray-700 leading-relaxed">
-            고객은 사장님을 만나기 전에 이 상세페이지를 보고 기술력을 판단합니다. 가지고 계신 회사 소개서(PDF)나 카탈로그를 이미지로 변환해서 올려주셔도 좋습니다.
+          <p className="text-sm text-gray-700 leading-tight mb-0.5">
+            우리 회사의 기술력, 보유 설비, 공정 과정을 담은 '온라인용
+            카탈로그'라고 생각하시면 됩니다.
+          </p>
+          <p className="text-sm text-gray-700 leading-tight mb-0.5">
+            고객은 사장님을 만나기 전에 이 상세페이지를 보고 기술력을
+            판단합니다.
+          </p>
+          <p className="text-sm text-gray-700 leading-tight">
+            가지고 계신 회사 소개서(PDF)나 카탈로그를 이미지로 변환해서
+            올려주셔도 좋습니다.
           </p>
         </div>
       </div>
@@ -72,7 +82,12 @@ export const DetailImageSection = memo(function DetailImageSection({
               upgradeSource="상세 이미지"
               variant="inline"
               onUpgradeSuccess={onUpgradeSuccess}
-            />
+            >
+              상세페이지 이미지는 기본 1개 (세로 최대 5,000px) 가능하며,
+              <br />
+              추가 등록 또는 세로 길이 연장은 Enterprise 등급 업그레이드를 통해
+              가능합니다.
+            </UpgradePrompt>
           </>
         ) : (
           <>
@@ -87,28 +102,33 @@ export const DetailImageSection = memo(function DetailImageSection({
                 upgradeSource="상세 이미지"
                 variant="inline"
                 onUpgradeSuccess={onUpgradeSuccess}
-              />
+              >
+                상세페이지 이미지는 기본 1개 (세로 최대 5,000px) 가능하며,
+                <br />
+                추가 등록 또는 세로 길이 연장은 Enterprise 등급 업그레이드를
+                통해 가능합니다.
+              </UpgradePrompt>
             )}
           </>
         )}
         <p className="text-sm text-gray-500">
-          여기에 상세페이지 이미지를 등록해 주세요. (권장 너비: 860px / JPG, PNG 파일)
+          여기에 상세페이지 이미지를 등록해 주세요. (권장 너비: 860px / JPG, PNG
+          파일)
         </p>
-        {isBasicGrade && (
-          <p className="text-xs text-gray-500">
-            {currentImageCount < freeImageLimit
-              ? `무료로 ${freeImageLimit}장까지 업로드 가능합니다. (현재 ${currentImageCount}/${freeImageLimit}장)`
-              : `무료로 업로드 가능한 ${freeImageLimit}장을 모두 사용하셨습니다. 더 많은 이미지를 업로드하려면 등급을 업그레이드해주세요.`}
-          </p>
-        )}
       </div>
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-gray-700 leading-relaxed">
-          💡 자료가 없거나, 만들 시간이 부족하신가요? 걱정하지 마세요. 플랜틀리가 직접 찾아뵙고, 우리 회사의 기술력이 돋보이도록 기획부터 상세페이지 제작까지 완벽하게 해결해 드립니다. 문의하기 : 카카오톡 "플랜틀리주식회사" 검색
+        <p className="text-sm text-gray-700 leading-tight mb-0.5">
+          💡 자료가 없거나, 만들 시간이 부족하신가요? 걱정하지 마세요.
+        </p>
+        <p className="text-sm text-gray-700 leading-tight mb-0.5">
+          플랜틀리가 직접 찾아뵙고, 우리 회사의 기술력이 돋보이도록 기획부터
+          상세페이지 제작까지 완벽하게 해결해 드립니다.
+        </p>
+        <p className="text-sm text-gray-700 leading-tight">
+          문의하기 : 카카오톡 "플랜틀리주식회사" 검색
         </p>
       </div>
     </div>
   );
 });
-

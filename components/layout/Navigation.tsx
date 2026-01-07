@@ -180,7 +180,7 @@ export function Navigation({ isLoggedIn, userName, isAdmin }: NavigationProps) {
         <Button asChild variant="outline" className="border-gray-300 ml-auto">
           <Link href="/admin">
             <Settings className="w-4 h-4 mr-2" />
-            어드민
+            관리자
           </Link>
         </Button>
       )}
