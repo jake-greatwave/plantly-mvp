@@ -1,72 +1,80 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { toast } from 'sonner'
-import { Settings } from 'lucide-react'
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Settings } from "lucide-react";
 
 interface NavigationProps {
-  isLoggedIn: boolean
-  userName?: string
-  isAdmin?: boolean
+  isLoggedIn: boolean;
+  userName?: string;
+  isAdmin?: boolean;
 }
 
 export function Navigation({ isLoggedIn, userName, isAdmin }: NavigationProps) {
-  const router = useRouter()
-  const [hasVerifiedCompany, setHasVerifiedCompany] = useState(false)
-  const [isChecking, setIsChecking] = useState(true)
+  const router = useRouter();
+  const pathname = usePathname();
+  const [hasVerifiedCompany, setHasVerifiedCompany] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
     if (!isLoggedIn) {
-      setIsChecking(false)
-      return
+      setIsChecking(false);
+      setHasVerifiedCompany(false);
+      return;
     }
 
     const checkVerifiedCompanies = async () => {
       try {
-        const response = await fetch('/api/companies/my')
-        const result = await response.json()
+        const response = await fetch("/api/companies/my", {
+          cache: "no-store",
+        });
+        const result = await response.json();
 
         if (response.ok && result.success) {
-          const hasVerified = result.data?.some((company: any) => company.is_verified === true)
-          setHasVerifiedCompany(hasVerified)
+          const hasVerified = result.data?.some(
+            (company: any) => company.is_verified === true
+          );
+          setHasVerifiedCompany(hasVerified);
+        } else {
+          setHasVerifiedCompany(false);
         }
       } catch {
-        setHasVerifiedCompany(false)
+        setHasVerifiedCompany(false);
       } finally {
-        setIsChecking(false)
+        setIsChecking(false);
       }
-    }
+    };
 
-    checkVerifiedCompanies()
-  }, [isLoggedIn])
+    checkVerifiedCompanies();
+  }, [isLoggedIn, pathname]);
 
   const handleRegisterClick = () => {
     if (!isLoggedIn) {
-      toast.error('로그인이 필요합니다.')
-      router.push('/login')
-      return
+      toast.error("로그인이 필요합니다.");
+      router.push("/login");
+      return;
     }
-    router.push('/companies/register')
-  }
+    router.push("/companies/register");
+  };
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('/api/auth/logout', {
-        method: 'POST',
-      })
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+      });
 
       if (response.ok) {
-        toast.success('로그아웃되었습니다.')
-        router.push('/login')
-        router.refresh()
+        toast.success("로그아웃되었습니다.");
+        router.push("/login");
+        router.refresh();
       }
     } catch {
-      toast.error('로그아웃 중 오류가 발생했습니다.')
+      toast.error("로그아웃 중 오류가 발생했습니다.");
     }
-  }
+  };
 
   if (isChecking && isLoggedIn) {
     return (
@@ -94,10 +102,7 @@ export function Navigation({ isLoggedIn, userName, isAdmin }: NavigationProps) {
                 <Link href="/account/settings">{userName}님</Link>
               </Button>
             )}
-            <Button
-              onClick={handleLogout}
-              variant="ghost"
-            >
+            <Button onClick={handleLogout} variant="ghost">
               로그아웃
             </Button>
           </div>
@@ -115,22 +120,23 @@ export function Navigation({ isLoggedIn, userName, isAdmin }: NavigationProps) {
           </Button>
         )}
       </nav>
-    )
+    );
   }
 
   return (
     <nav className="flex items-center gap-3">
       {isLoggedIn && hasVerifiedCompany && (
-        <Button asChild variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50 bg-white">
+        <Button
+          asChild
+          variant="outline"
+          className="border-blue-600 text-blue-600 hover:bg-blue-50 bg-white"
+        >
           <Link href="/my-company">우리 기업</Link>
         </Button>
       )}
 
       {isLoggedIn && hasVerifiedCompany ? (
-        <Button
-          onClick={handleRegisterClick}
-          variant="ghost"
-        >
+        <Button onClick={handleRegisterClick} variant="ghost">
           기업정보 등록
         </Button>
       ) : (
@@ -148,7 +154,7 @@ export function Navigation({ isLoggedIn, userName, isAdmin }: NavigationProps) {
           <Link href="/my-company">우리 기업</Link>
         </Button>
       )}
-      
+
       {isLoggedIn ? (
         <div className="flex items-center gap-3">
           {userName && (
@@ -160,10 +166,7 @@ export function Navigation({ isLoggedIn, userName, isAdmin }: NavigationProps) {
               <Link href="/account/settings">{userName}님</Link>
             </Button>
           )}
-          <Button
-            onClick={handleLogout}
-            variant="ghost"
-          >
+          <Button onClick={handleLogout} variant="ghost">
             로그아웃
           </Button>
         </div>
@@ -182,5 +185,5 @@ export function Navigation({ isLoggedIn, userName, isAdmin }: NavigationProps) {
         </Button>
       )}
     </nav>
-  )
+  );
 }
