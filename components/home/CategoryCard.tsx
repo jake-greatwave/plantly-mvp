@@ -12,6 +12,7 @@ interface CategoryCardProps {
   code: string;
   iconUrl?: string | null;
   iconIndex?: number;
+  description?: string;
 }
 
 export function CategoryCard({
@@ -20,6 +21,7 @@ export function CategoryCard({
   code,
   iconUrl,
   iconIndex,
+  description,
 }: CategoryCardProps) {
   const router = useRouter();
   const Icon =
@@ -35,7 +37,7 @@ export function CategoryCard({
     <Card
       onClick={handleClick}
       className="bg-white border-gray-200 p-5 hover:border-blue-600 hover:shadow-md transition-all cursor-pointer text-center !gap-3"
-      style={{ minHeight: "140px", height: "140px" }}
+      style={{ minHeight: "180px", height: "180px" }}
     >
       <div
         className="w-12 h-12 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center mx-auto"
@@ -47,7 +49,10 @@ export function CategoryCard({
           <Icon className="w-6 h-6" />
         )}
       </div>
-      <div className="text-gray-900 text-base font-medium">{name}</div>
+      <div className="text-gray-900 text-base font-medium mb-1">{name}</div>
+      {description && (
+        <div className="text-gray-600 text-xs leading-relaxed whitespace-pre-line">{description}</div>
+      )}
     </Card>
   );
 }

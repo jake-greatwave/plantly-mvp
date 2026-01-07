@@ -18,7 +18,6 @@ export function SearchBar() {
     subCategory: string;
     industries: string[];
     selectedCountries: string[];
-    isVerified: boolean;
     isFeatured: boolean;
   } | null>(null);
 
@@ -52,9 +51,6 @@ export function SearchBar() {
       if (currentFilters.selectedCountries.length > 0) {
         params.set("countries", currentFilters.selectedCountries.join(","));
       }
-      if (currentFilters.isVerified) {
-        params.set("is_verified", "true");
-      }
       if (currentFilters.isFeatured) {
         params.set("is_featured", "true");
       }
@@ -64,7 +60,6 @@ export function SearchBar() {
       const urlSubCategory = searchParams.get("category_id");
       const urlIndustries = searchParams.get("industries");
       const urlCountries = searchParams.get("countries");
-      const urlIsVerified = searchParams.get("is_verified");
       const urlIsFeatured = searchParams.get("is_featured");
 
       if (urlParentCategory) params.set("parent_category_id", urlParentCategory);
@@ -72,7 +67,6 @@ export function SearchBar() {
       if (urlSubCategory) params.set("category_id", urlSubCategory);
       if (urlIndustries) params.set("industries", urlIndustries);
       if (urlCountries) params.set("countries", urlCountries);
-      if (urlIsVerified) params.set("is_verified", urlIsVerified);
       if (urlIsFeatured) params.set("is_featured", urlIsFeatured);
     }
 
@@ -85,7 +79,6 @@ export function SearchBar() {
     searchParams.get("category_id") ||
     searchParams.get("industries") ||
     searchParams.get("countries") ||
-    searchParams.get("is_verified") === "true" ||
     searchParams.get("is_featured") === "true";
 
   return (
@@ -132,7 +125,6 @@ export function SearchBar() {
                 searchParams.get("category_id") ||
                 searchParams.get("industries") ||
                 searchParams.get("countries") ||
-                searchParams.get("is_verified") === "true" ||
                 searchParams.get("is_featured") === "true";
               if (!hasFilters) {
                 setShowFilters(false);

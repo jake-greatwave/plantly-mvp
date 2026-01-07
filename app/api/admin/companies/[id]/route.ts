@@ -22,23 +22,29 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await request.json();
-    const { is_verified } = body;
+    const { is_verified, is_spotlight, spotlight_order } = body;
 
-    if (typeof is_verified !== "boolean") {
-      return NextResponse.json(
-        { error: "승인 상태는 boolean 값이어야 합니다." },
-        { status: 400 }
-      );
+    const updateData: any = {
+      updated_at: new Date().toISOString(),
+    };
+
+    if (typeof is_verified === "boolean") {
+      updateData.is_verified = is_verified;
+    }
+
+    if (typeof is_spotlight === "boolean") {
+      updateData.is_spotlight = is_spotlight;
+    }
+
+    if (spotlight_order !== undefined) {
+      updateData.spotlight_order = spotlight_order === null || spotlight_order === "" ? null : parseInt(spotlight_order, 10);
     }
 
     const supabase = await createClient();
 
     const { data, error } = await supabase
       .from("companies")
-      .update({
-        is_verified,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq("id", id)
       .select()
       .single();
@@ -94,6 +100,7 @@ export async function DELETE(
     );
   }
 }
+
 
 
 

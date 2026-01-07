@@ -57,7 +57,8 @@ export async function GET(request: Request, { params }: RouteParams) {
         updated_at,
         company_images(id, image_url, image_type, display_order),
         company_categories(category_id, categories(id, parent_id, category_name)),
-        company_regions(region_id, regions(id, region_name, region_type))
+        company_regions(region_id, regions(id, region_name, region_type)),
+        company_tags(id, tag_name)
       `)
       .eq('id', id)
 
@@ -135,7 +136,11 @@ export async function PUT(request: Request, { params }: RouteParams) {
     const body = await request.json()
     const supabase = await createClient()
 
-    console.log('PUT request body.countries:', body.countries)
+    console.log('PUT request body:', {
+      category_ids: body.category_ids,
+      custom_categories: body.custom_categories,
+      countries: body.countries,
+    })
 
     const fullAddress = body.address
       ? body.address_detail
@@ -198,6 +203,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
     await supabase.from('company_images').delete().eq('company_id', id)
     await supabase.from('company_categories').delete().eq('company_id', id)
+    await supabase.from('company_tags').delete().eq('company_id', id)
     await supabase.from('company_regions').delete().eq('company_id', id)
 
     if (body.main_image) {
@@ -220,27 +226,22 @@ export async function PUT(request: Request, { params }: RouteParams) {
       await supabase.from('company_images').insert(imageInserts)
     }
 
-    const categoryIds: string[] = []
-
-    if (body.parent_category) {
-      categoryIds.push(body.parent_category)
-    }
-
-    if (body.middle_category) {
-      categoryIds.push(body.middle_category)
-    }
-
     if (body.category_ids && body.category_ids.length > 0) {
-      categoryIds.push(...body.category_ids)
-    }
-
-    if (categoryIds.length > 0) {
-      const categoryInserts = categoryIds.map((catId: string) => ({
+      const categoryInserts = body.category_ids.map((catId: string) => ({
         company_id: id,
         category_id: catId,
       }))
 
       await supabase.from('company_categories').insert(categoryInserts)
+    }
+
+    if (body.custom_categories && Array.isArray(body.custom_categories) && body.custom_categories.length > 0) {
+      const tagInserts = body.custom_categories.map((tagName: string) => ({
+        company_id: id,
+        tag_name: tagName.trim(),
+      }))
+
+      await supabase.from('company_tags').insert(tagInserts)
     }
 
     if (body.countries && Array.isArray(body.countries) && body.countries.length > 0) {

@@ -66,18 +66,20 @@ export function SearchResultCard({ company }: SearchResultCardProps) {
       onClick={handleClick}
       className="bg-white border-gray-200 overflow-hidden hover:border-blue-600 hover:shadow-lg transition-all cursor-pointer h-full flex flex-col"
     >
-      <div className="relative w-full h-48 bg-gray-100 overflow-hidden">
+      <div className="relative w-full h-48 bg-white overflow-hidden p-3">
         {mainImage ? (
-          <Image
-            src={mainImage}
-            alt={company.company_name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            unoptimized
-          />
+          <div className="relative w-full h-full">
+            <Image
+              src={mainImage}
+              alt={company.company_name}
+              fill
+              className="object-cover rounded"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              unoptimized
+            />
+          </div>
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
+          <div className="w-full h-full flex items-center justify-center rounded">
             <Building2 className="w-16 h-16 text-gray-400" />
           </div>
         )}

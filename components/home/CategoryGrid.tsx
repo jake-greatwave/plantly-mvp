@@ -8,6 +8,13 @@ const MAIN_CATEGORY_ICONS = [
   'Settings',
 ]
 
+const CATEGORY_DESCRIPTIONS: Record<string, string> = {
+  '제조 솔루션': '금형·지그·자동화·파렛트 등\n생산 핵심 하드웨어',
+  '제조 인프라': 'MES·스마트팩토리 등\n공장 관리 IT 시스템',
+  '환경·ESG': '청소·집진·안전관리 등\n법적 필수 용역',
+  '공장 운영': '공구·자재·유지보수 등\n현장 소모품 일체',
+}
+
 export async function CategoryGrid() {
   const allCategories = await getCategories(null)
   
@@ -29,6 +36,7 @@ export async function CategoryGrid() {
               code={category.category_code}
               iconUrl={category.icon_url}
               iconIndex={index}
+              description={CATEGORY_DESCRIPTIONS[category.category_name]}
             />
           ))}
         </div>

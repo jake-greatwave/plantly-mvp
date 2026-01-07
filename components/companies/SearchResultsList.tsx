@@ -66,7 +66,6 @@ export function SearchResultsList() {
         const regionId = searchParams.get("region_id");
         const countries = searchParams.get("countries");
         const industries = searchParams.get("industries");
-        const isVerified = searchParams.get("is_verified");
         const isFeatured = searchParams.get("is_featured");
 
         if (search) params.set("search", search);
@@ -76,7 +75,6 @@ export function SearchResultsList() {
         if (regionId) params.set("region_id", regionId);
         if (countries) params.set("countries", countries);
         if (industries) params.set("industries", industries);
-        if (isVerified) params.set("is_verified", isVerified);
         if (isFeatured) params.set("is_featured", isFeatured);
 
         const response = await fetch(`/api/companies?${params.toString()}`);

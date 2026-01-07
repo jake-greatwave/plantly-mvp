@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import { TokenRefreshProvider } from "@/components/providers/TokenRefreshProvider";
 
 export const metadata: Metadata = {
@@ -29,8 +30,11 @@ export default function RootLayout({
       </head>
       <body className="antialiased" style={{ fontFamily: "'Noto Sans KR', sans-serif" }}>
         <TokenRefreshProvider>
-          <Header />
-          <main>{children}</main>
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
           <Toaster />
         </TokenRefreshProvider>
       </body>

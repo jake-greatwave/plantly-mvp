@@ -13,8 +13,8 @@ export interface GradeLimits {
 export const GRADE_LIMITS: Record<UserGrade, GradeLimits> = {
   basic: {
     maxCategoryTags: 2,
-    maxImages: 0,
-    canUploadImages: false,
+    maxImages: 2,
+    canUploadImages: true,
     canUploadVideo: false,
     canCustomizeColor: false,
     canBeFeatured: false,

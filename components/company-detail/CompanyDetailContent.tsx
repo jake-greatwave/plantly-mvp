@@ -1,5 +1,6 @@
 import { CompanyHero } from "./CompanyHero";
 import { CompanyOverview } from "./CompanyOverview";
+import { CompanyVideo } from "./CompanyVideo";
 import { CompanyContent } from "./CompanyContent";
 import { CompanyImageGallery } from "./CompanyImageGallery";
 import { createClient } from "@/lib/supabase/server";
@@ -121,6 +122,17 @@ export async function CompanyDetailContent({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="space-y-8">
           <CompanyOverview company={company} brandColor={brandColor} />
+          {company.video_url && (
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <h2
+                className="text-2xl font-bold mb-4"
+                style={{ color: brandColor }}
+              >
+                기업소개 동영상
+              </h2>
+              <CompanyVideo videoUrl={company.video_url} />
+            </div>
+          )}
           <CompanyContent company={company} />
           <CompanyImageGallery company={company} />
         </div>

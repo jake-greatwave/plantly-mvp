@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { CompanyPreviewDialog } from "./CompanyPreviewDialog";
 import { formatAddressShort } from "@/lib/utils/address";
 import { toast } from "sonner";
@@ -24,14 +26,21 @@ export function CompanyCard({ company, onUpdate, onDelete }: CompanyCardProps) {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isVerified, setIsVerified] = useState(company.is_verified);
+  const [isSpotlight, setIsSpotlight] = useState(company.is_spotlight || false);
+  const [spotlightOrder, setSpotlightOrder] = useState(
+    company.spotlight_order?.toString() || ""
+  );
   const [isToggling, setIsToggling] = useState(false);
+  const [isSpotlightToggling, setIsSpotlightToggling] = useState(false);
   const [deletedCompany, setDeletedCompany] = useState<AdminCompany | null>(
     null
   );
 
   useEffect(() => {
     setIsVerified(company.is_verified);
-  }, [company.is_verified]);
+    setIsSpotlight(company.is_spotlight || false);
+    setSpotlightOrder(company.spotlight_order?.toString() || "");
+  }, [company.is_verified, company.is_spotlight, company.spotlight_order]);
 
   const mainImage =
     company.company_images?.find((img) => img.image_type === "main")
@@ -116,6 +125,82 @@ export function CompanyCard({ company, onUpdate, onDelete }: CompanyCardProps) {
     }
   };
 
+  const handleToggleSpotlight = async (checked: boolean) => {
+    setIsSpotlightToggling(true);
+    const previousValue = isSpotlight;
+    const previousOrder = spotlightOrder;
+    setIsSpotlight(checked);
+
+    if (!checked) {
+      setSpotlightOrder("");
+    } else if (!spotlightOrder) {
+      // 활성화 시 기본 순서 설정 (현재 최대값 + 1)
+      setSpotlightOrder("1");
+    }
+
+    try {
+      const orderValue = checked
+        ? spotlightOrder
+          ? parseInt(spotlightOrder, 10)
+          : 1
+        : null;
+
+      const response = await fetch(`/api/admin/companies/${company.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          is_spotlight: checked,
+          spotlight_order: orderValue,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("눈 여겨볼 기업 설정 실패");
+      }
+
+      toast.success(
+        checked
+          ? "눈 여겨볼 기업으로 설정되었습니다."
+          : "눈 여겨볼 기업 설정이 해제되었습니다."
+      );
+    } catch (error) {
+      setIsSpotlight(previousValue);
+      setSpotlightOrder(previousOrder);
+      toast.error("설정 변경에 실패했습니다.");
+    } finally {
+      setIsSpotlightToggling(false);
+    }
+  };
+
+  const handleOrderChange = async (value: string) => {
+    setSpotlightOrder(value);
+    if (!isSpotlight || !value) return;
+
+    const orderValue = value ? parseInt(value, 10) : null;
+    if (isNaN(orderValue || 0)) return;
+
+    try {
+      const response = await fetch(`/api/admin/companies/${company.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          is_spotlight: true,
+          spotlight_order: orderValue,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("순서 변경 실패");
+      }
+    } catch (error) {
+      toast.error("순서 변경에 실패했습니다.");
+    }
+  };
+
   return (
     <>
       <Card className="p-4 hover:shadow-lg transition-shadow">
@@ -177,6 +262,37 @@ export function CompanyCard({ company, onUpdate, onDelete }: CompanyCardProps) {
                         {String(industry)}
                       </Badge>
                     ))}
+                </div>
+              )}
+            </div>
+
+            {/* 눈 여겨볼 기업 설정 */}
+            <div className="mb-3 p-2 bg-gray-50 rounded border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <Label htmlFor={`spotlight-${company.id}`} className="text-sm font-medium">
+                  눈 여겨볼 기업
+                </Label>
+                <Switch
+                  id={`spotlight-${company.id}`}
+                  checked={isSpotlight}
+                  onCheckedChange={handleToggleSpotlight}
+                  disabled={isSpotlightToggling}
+                />
+              </div>
+              {isSpotlight && (
+                <div className="flex items-center gap-2">
+                  <Label htmlFor={`order-${company.id}`} className="text-xs text-gray-600">
+                    순서:
+                  </Label>
+                  <Input
+                    id={`order-${company.id}`}
+                    type="number"
+                    min="1"
+                    value={spotlightOrder}
+                    onChange={(e) => handleOrderChange(e.target.value)}
+                    className="w-20 h-7 text-xs"
+                    placeholder="1"
+                  />
                 </div>
               )}
             </div>

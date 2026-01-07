@@ -13,7 +13,9 @@ import { TechnicalSpecSection } from './TechnicalSpecSection'
 import { ReferenceSection } from './ReferenceSection'
 import { TradingConditionSection } from './TradingConditionSection'
 import { BrandingSection } from './BrandingSection'
+import { VideoSection } from './VideoSection'
 import { ContentSection } from './ContentSection'
+import { DetailImageSection } from './DetailImageSection'
 import type { CompanyFormData } from '@/lib/types/company-form.types'
 
 const DEFAULT_FORM_DATA: Partial<CompanyFormData> = {
@@ -22,6 +24,7 @@ const DEFAULT_FORM_DATA: Partial<CompanyFormData> = {
   parent_category: '',
   middle_category: '',
   category_ids: [],
+  custom_categories: [],
   industries: [],
   equipment_list: [],
   materials: [],
@@ -81,6 +84,7 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
             parent_category: parsed.parent_category ? String(parsed.parent_category) : '',
             middle_category: parsed.middle_category ? String(parsed.middle_category) : '',
             category_ids: Array.isArray(parsed.category_ids) ? parsed.category_ids.map(String) : [],
+            custom_categories: Array.isArray(parsed.custom_categories) ? parsed.custom_categories.map(String) : [],
             pricing_type: parsed.pricing_type ? String(parsed.pricing_type) : '',
           }
           setFormData(normalizedData)
@@ -111,20 +115,11 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
         const mainImage = company.company_images?.find((img: any) => img.image_type === 'main')?.image_url || ''
         const imageUrls = company.company_images?.filter((img: any) => img.image_type !== 'main').map((img: any) => img.image_url) || []
         
-        const parentCategory = company.company_categories?.find(
-          (cc: any) => cc.categories?.parent_id === null
-        )?.category_id
-        
-        const middleCategory = company.company_categories?.find(
-          (cc: any) => cc.categories?.parent_id === parentCategory
-        )?.category_id
-        
         const subCategoryIds = company.company_categories
-          ?.filter((cc: any) => {
-            const parentId = cc.categories?.parent_id
-            return parentId && parentId !== parentCategory && parentId === middleCategory
-          })
-          .map((cc: any) => cc.category_id) || []
+          ?.map((cc: any) => cc.category_id) || []
+        
+        const customCategories = company.company_tags
+          ?.map((tag: any) => tag.tag_name) || []
         
         const fullAddress = company.address || ''
         const addressDetail = company.address_detail || ''
@@ -147,9 +142,10 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
           postcode: company.postcode || '',
           address: mainAddress,
           address_detail: addressDetail,
-          parent_category: parentCategory || '',
-          middle_category: middleCategory || '',
+          parent_category: '',
+          middle_category: '',
           category_ids: subCategoryIds,
+          custom_categories: customCategories,
           industries: company.industries || [],
           equipment_list: company.equipment || [],
           materials: company.materials || [],
@@ -235,12 +231,6 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
     if (!formData.address_detail) {
       return { isValid: false, errorField: '상세주소', section: 'basic' }
     }
-    if (!formData.parent_category) {
-      return { isValid: false, errorField: '대분류', section: 'category' }
-    }
-    if (!formData.middle_category) {
-      return { isValid: false, errorField: '중분류', section: 'category' }
-    }
     if (!formData.category_ids || formData.category_ids.length === 0) {
       return { isValid: false, errorField: '소분류', section: 'category' }
     }
@@ -322,12 +312,19 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
       const url = companyId ? `/api/companies/${companyId}` : '/api/companies'
       const method = companyId ? 'PUT' : 'POST'
 
+      const dataToSubmit = formDataRef.current
+
+      console.log('Submitting data:', {
+        category_ids: dataToSubmit.category_ids,
+        custom_categories: dataToSubmit.custom_categories,
+      })
+
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSubmit),
       })
 
       const data = await response.json()
@@ -414,7 +411,23 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
           onUpgradeSuccess={refreshUserInfo}
         />
         <Separator />
+        <VideoSection 
+          data={formData} 
+          onFieldChange={handleFieldChange} 
+          userGrade={userGrade} 
+          isAdmin={isAdmin}
+          onUpgradeSuccess={refreshUserInfo}
+        />
+        <Separator />
         <ContentSection data={formData} onFieldChange={handleFieldChange} />
+        <Separator />
+        <DetailImageSection 
+          data={formData} 
+          onFieldChange={handleFieldChange} 
+          userGrade={userGrade} 
+          isAdmin={isAdmin}
+          onUpgradeSuccess={refreshUserInfo}
+        />
       </Card>
 
       <div className="flex gap-3 mt-6 sticky bottom-4 bg-white p-4 rounded-lg border border-gray-200 shadow-lg z-10">
