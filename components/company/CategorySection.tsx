@@ -58,6 +58,7 @@ export const CategorySection = memo(function CategorySection({
   const [categoryMap, setCategoryMap] = useState<Map<string, Category>>(new Map());
   const [isCustomCategoryEnabled, setIsCustomCategoryEnabled] = useState<boolean>(false);
   const [customCategoryInput, setCustomCategoryInput] = useState<string>("");
+  const [isComposing, setIsComposing] = useState<boolean>(false);
 
   const loadParentCategories = useCallback(async () => {
     try {
@@ -178,8 +179,8 @@ export const CategorySection = memo(function CategorySection({
 
   const canAddMore = useMemo(
     () =>
-      canAddCategoryTag(categoryIds.length, userGrade, isAdmin) || isEnterprise,
-    [categoryIds.length, userGrade, isAdmin, isEnterprise]
+      canAddCategoryTag(categoryIds.length + customCategories.length, userGrade, isAdmin) || isEnterprise,
+    [categoryIds.length, customCategories.length, userGrade, isAdmin, isEnterprise]
   );
 
   const selectedCategories = useMemo(() => {
@@ -207,18 +208,19 @@ export const CategorySection = memo(function CategorySection({
           categoryIds.filter((id) => id !== categoryId)
         );
       } else {
+        const totalCount = categoryIds.length + customCategories.length;
         if (
           !canAddMore &&
           !isAdmin &&
           userGrade === "basic" &&
-          categoryIds.length >= limits.maxCategoryTags
+          totalCount >= limits.maxCategoryTags
         ) {
           return;
         }
         onFieldChange("category_ids", [...categoryIds, categoryId]);
       }
     },
-    [categoryIds, canAddMore, isAdmin, userGrade, limits.maxCategoryTags, onFieldChange]
+    [categoryIds, customCategories.length, canAddMore, isAdmin, userGrade, limits.maxCategoryTags, onFieldChange]
   );
 
   const handleRemoveCategory = useCallback(
@@ -387,8 +389,10 @@ export const CategorySection = memo(function CategorySection({
                     placeholder="소분류를 직접 입력하세요"
                     value={customCategoryInput}
                     onChange={(e) => setCustomCategoryInput(e.target.value)}
+                    onCompositionStart={() => setIsComposing(true)}
+                    onCompositionEnd={() => setIsComposing(false)}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter" && customCategoryInput.trim()) {
+                      if (e.key === "Enter" && !isComposing && customCategoryInput.trim()) {
                         e.preventDefault();
                         const trimmed = customCategoryInput.trim();
                         if (!customCategories.includes(trimmed)) {
@@ -441,7 +445,10 @@ export const CategorySection = memo(function CategorySection({
               )}
             </div>
           )}
-          {!canAddMore && !isAdmin && userGrade === "basic" && (
+          {!isAdmin && 
+           userGrade === "basic" && 
+           !isEnterprise &&
+           categoryIds.length + customCategories.length >= limits.maxCategoryTags && (
             <UpgradePrompt
               feature="소분류 태그"
               upgradeSource="소분류 태그"

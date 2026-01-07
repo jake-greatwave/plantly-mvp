@@ -77,3 +77,4 @@ export const TechnicalSpecSection = memo(function TechnicalSpecSection({ data, o
 
 
 
+
