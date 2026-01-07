@@ -236,6 +236,12 @@ export function CompanyCard({ company, onUpdate, onDelete }: CompanyCardProps) {
                   </span>
                 </div>
               )}
+
+              {/* 조회수 표시 */}
+              <div className="flex items-center gap-1 text-xs text-gray-500">
+                <Eye className="w-3 h-3 shrink-0" />
+                <span>조회수: {company.view_count || 0}</span>
+              </div>
             </div>
           </div>
 

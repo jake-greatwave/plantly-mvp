@@ -3,8 +3,8 @@ import { CompanyOverview } from "./CompanyOverview";
 import { CompanyVideo } from "./CompanyVideo";
 import { CompanyContent } from "./CompanyContent";
 import { CompanyImageGallery } from "./CompanyImageGallery";
+import { ViewCounter } from "./ViewCounter";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentUser } from "@/lib/utils/auth";
 import { getGradientBackground } from "@/lib/utils/color";
 import type { CompanyDetail } from "@/lib/types/company-detail.types";
 
@@ -15,7 +15,6 @@ interface CompanyDetailContentProps {
 async function fetchCompany(id: string): Promise<CompanyDetail | null> {
   try {
     const supabase = await createClient();
-    const user = await getCurrentUser();
 
     const baseQuery = supabase
       .from("companies")
@@ -69,23 +68,9 @@ async function fetchCompany(id: string): Promise<CompanyDetail | null> {
       return null;
     }
 
-    if (user && data.user_id === user.userId) {
-      await supabase
-        .from("companies")
-        .update({ view_count: (data.view_count || 0) + 1 })
-        .eq("id", id);
-      return data as unknown as CompanyDetail;
-    }
-
     if (!data.is_verified) {
       return null;
     }
-
-    const viewCount = data.view_count || 0;
-    await supabase
-      .from("companies")
-      .update({ view_count: viewCount + 1 })
-      .eq("id", id);
 
     return data as unknown as CompanyDetail;
   } catch {
@@ -118,6 +103,7 @@ export async function CompanyDetailContent({
 
   return (
     <div className="min-h-screen" style={{ background: gradientBackground }}>
+      <ViewCounter companyId={companyId} />
       <CompanyHero company={company} brandColor={brandColor} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="space-y-8">

@@ -44,20 +44,25 @@ export const DetailImageSection = memo(function DetailImageSection({
       </div>
 
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-gray-900">[안내 가이드]</p>
-          <p className="text-sm text-gray-700 leading-relaxed">
+        <div>
+          <p className="text-sm font-medium text-gray-900 mb-1">
+            [안내 가이드]
+          </p>
+          <p className="text-sm text-gray-700 leading-tight mb-0.5">
             네이버나 쿠팡에서 물건을 살 때, 아래로 쭉 내려보며 읽던 긴 설명
             이미지를 보신 적 있나요? 그게 바로 '상세페이지'입니다.
           </p>
-          <p className="text-sm text-gray-700 leading-relaxed">
+          <p className="text-sm text-gray-700 leading-tight mb-0.5">
             우리 회사의 기술력, 보유 설비, 공정 과정을 담은 '온라인용
             카탈로그'라고 생각하시면 됩니다.
           </p>
-          <p className="text-sm text-gray-700 leading-relaxed">
+          <p className="text-sm text-gray-700 leading-tight mb-0.5">
             고객은 사장님을 만나기 전에 이 상세페이지를 보고 기술력을
-            판단합니다. 가지고 계신 회사 소개서(PDF)나 카탈로그를 이미지로
-            변환해서 올려주셔도 좋습니다.
+            판단합니다.
+          </p>
+          <p className="text-sm text-gray-700 leading-tight">
+            가지고 계신 회사 소개서(PDF)나 카탈로그를 이미지로 변환해서
+            올려주셔도 좋습니다.
           </p>
         </div>
       </div>
@@ -113,11 +118,15 @@ export const DetailImageSection = memo(function DetailImageSection({
       </div>
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-gray-700 leading-relaxed">
+        <p className="text-sm text-gray-700 leading-tight mb-0.5">
           💡 자료가 없거나, 만들 시간이 부족하신가요? 걱정하지 마세요.
+        </p>
+        <p className="text-sm text-gray-700 leading-tight mb-0.5">
           플랜틀리가 직접 찾아뵙고, 우리 회사의 기술력이 돋보이도록 기획부터
-          상세페이지 제작까지 완벽하게 해결해 드립니다. 문의하기 : 카카오톡
-          "플랜틀리주식회사" 검색
+          상세페이지 제작까지 완벽하게 해결해 드립니다.
+        </p>
+        <p className="text-sm text-gray-700 leading-tight">
+          문의하기 : 카카오톡 "플랜틀리주식회사" 검색
         </p>
       </div>
     </div>

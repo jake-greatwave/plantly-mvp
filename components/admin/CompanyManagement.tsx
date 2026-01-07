@@ -22,6 +22,7 @@ export function CompanyManagement() {
   });
 
   const isVerified = searchParams.get("is_verified");
+  const sortBy = searchParams.get("sort_by");
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
 
   const fetchCompanies = useCallback(async () => {
@@ -31,6 +32,9 @@ export function CompanyManagement() {
       params.set("page", currentPage.toString());
       if (isVerified !== null && isVerified !== undefined) {
         params.set("is_verified", isVerified);
+      }
+      if (sortBy) {
+        params.set("sort_by", sortBy);
       }
 
       const response = await fetch(`/api/admin/companies?${params.toString()}`);
@@ -45,7 +49,7 @@ export function CompanyManagement() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, isVerified]);
+  }, [currentPage, isVerified, sortBy]);
 
   useEffect(() => {
     fetchCompanies();
@@ -55,6 +59,21 @@ export function CompanyManagement() {
     const params = new URLSearchParams();
     if (verified !== null) {
       params.set("is_verified", verified);
+    }
+    if (sortBy) {
+      params.set("sort_by", sortBy);
+    }
+    params.set("page", "1");
+    router.push(`/admin/companies?${params.toString()}`);
+  };
+
+  const handleSortChange = (newSortBy: string | null) => {
+    const params = new URLSearchParams();
+    if (isVerified !== null && isVerified !== undefined) {
+      params.set("is_verified", isVerified);
+    }
+    if (newSortBy) {
+      params.set("sort_by", newSortBy);
     }
     params.set("page", "1");
     router.push(`/admin/companies?${params.toString()}`);
@@ -95,6 +114,8 @@ export function CompanyManagement() {
       <CompanyFilters
         currentFilter={isVerified}
         onFilterChange={handleFilterChange}
+        sortBy={sortBy}
+        onSortChange={handleSortChange}
       />
 
       <CompanyList

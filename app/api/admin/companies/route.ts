@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1", 10);
     const limit = parseInt(searchParams.get("limit") || String(ITEMS_PER_PAGE), 10);
     const isVerified = searchParams.get("is_verified");
+    const sortBy = searchParams.get("sort_by");
 
     const supabase = await createClient();
 
@@ -46,8 +47,19 @@ export async function GET(request: NextRequest) {
         company_categories(category_id, categories(id, category_name))
       `,
         { count: "exact" }
-      )
-      .order("created_at", { ascending: false });
+      );
+
+    // 정렬 설정
+    if (sortBy === "view_count_desc") {
+      query = query.order("view_count", { ascending: false });
+    } else if (sortBy === "view_count_asc") {
+      query = query.order("view_count", { ascending: true });
+    } else if (sortBy === "company_name_asc") {
+      query = query.order("company_name", { ascending: true });
+    } else {
+      // 기본값: 최신순
+      query = query.order("created_at", { ascending: false });
+    }
 
     if (isVerified !== null && isVerified !== undefined) {
       query = query.eq("is_verified", isVerified === "true");

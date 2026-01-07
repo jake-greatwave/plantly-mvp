@@ -58,67 +58,65 @@ const PRICING_DATA = [
     ],
   },
   {
-    category: "상세페이지 & 레퍼런스 등록 등급제",
+    category: "상세페이지 & 영상 & 레퍼런스 등록 등급제",
     plans: [
       {
         grade: "기본(무료)",
         price: "무료",
-        features: "3개 등록",
+        features: "이미지 1개 등록 (세로 길이 5,000px 제한)\n레퍼런스 1개 등록",
         effect: "기본 정보 제공",
       },
       {
         grade: "Basic",
         price: "5만원/월",
-        features: "5개 등록",
+        features:
+          "이미지 1개 등록 (세로 길이 10,000px 제한)\n레퍼런스 2개 등록",
         effect: "검색 신뢰도 향상",
       },
       {
         grade: "Standard",
         price: "10만원/월",
-        features: "10개 등록",
+        features:
+          "이미지 1개 등록 (세로 길이 15,000px 제한)\n레퍼런스 4개 등록",
         effect: "제품·설비 상세 노출",
       },
       {
         grade: "Premium",
         price: "20만원/월",
-        features: "20개 등록",
+        features:
+          "이미지 1개 등록 (세로 길이 20,000px 제한)\n레퍼런스 6개 등록\n유튜브 영상 링크 등록 1개",
         effect: "기술·포트폴리오 강화",
       },
       {
         grade: "Enterprise",
         price: "40만원/월",
-        features: "30개 + PDF",
+        features:
+          "이미지 1개 등록 (세로 길이 25,000px 제한)\n레퍼런스 등록 제한없음\n유튜브 영상 링크 등록 제한없음",
         effect: "대규모 자료 보유 기업에 최적화",
       },
     ],
   },
   {
-    category: "상세페이지 제작 서비스",
+    category: "(별도상품)상세페이지 이미지 제작 서비스",
     plans: [
       {
-        grade: "Basic",
-        price: "90만원/건",
-        features: "5장 제작",
+        grade: "상세페이지 이미지 기획 + 제작",
+        price: "15만원/세로 5,000px",
+        features: "보유 자료(사진, 회사소개서 등) 있을 경우",
         effect: "홈페이지 운영·자료화 부담 해소",
       },
       {
-        grade: "Standard",
-        price: "150만원/건",
-        features: "10장 제작",
+        grade: "별도 문의",
+        price: "상담 후 결정",
+        features: "방문 상담 + 사진 촬영 등",
         effect: "기술·설비 설명자료 정리",
       },
-      {
-        grade: "Premium",
-        price: "250만원/건",
-        features: "20장 제작",
-        effect: "전문 영업자료 확보",
-      },
-      {
-        grade: "Enterprise",
-        price: "500만원/건",
-        features: "30장 + PDF 제작",
-        effect: "기업 브랜딩·입찰자료 활용",
-      },
+    ],
+    allEffects: [
+      "홈페이지 운영·자료화 부담 해소",
+      "기술·설비 설명자료 정리",
+      "전문 영업자료 확보",
+      "기업 브랜딩·입찰자료 활용",
     ],
   },
   {
@@ -152,9 +150,9 @@ export function PricingTableDialog({
 }: PricingTableDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
+      <DialogContent
         className="!max-w-[50vw] max-h-[90vh] overflow-y-auto w-[50vw]"
-        style={{ maxWidth: '50vw', width: '50vw' }}
+        style={{ maxWidth: "50vw", width: "50vw" }}
       >
         <DialogHeader>
           <DialogTitle className="text-xl">플랜틀리 가격 정책</DialogTitle>
@@ -164,40 +162,94 @@ export function PricingTableDialog({
         </DialogHeader>
 
         <div className="space-y-8 py-4">
-          {PRICING_DATA.map((item, categoryIndex) => (
-            <div key={categoryIndex} className="space-y-3">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {item.category}
-              </h3>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[120px]">등급</TableHead>
-                      <TableHead className="w-[150px]">가격(월/건)</TableHead>
-                      <TableHead>제공 기능 및 특징</TableHead>
-                      <TableHead>기대 효과</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {item.plans.map((plan, planIndex) => (
-                      <TableRow key={planIndex}>
-                        <TableCell className="font-medium">
-                          {plan.grade}
-                        </TableCell>
-                        <TableCell>{plan.price}</TableCell>
-                        <TableCell>{plan.features}</TableCell>
-                        <TableCell>{plan.effect}</TableCell>
+          {PRICING_DATA.map((item, categoryIndex) => {
+            const isImageProductionService =
+              item.category === "(별도상품)상세페이지 이미지 제작 서비스";
+
+            return (
+              <div key={categoryIndex} className="space-y-3">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {item.category}
+                </h3>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        {isImageProductionService ? (
+                          <>
+                            <TableHead className="w-[200px]">
+                              제작 항목
+                            </TableHead>
+                            <TableHead className="w-[150px]">
+                              가격(원/길이)
+                            </TableHead>
+                            <TableHead>제작 기준</TableHead>
+                            <TableHead
+                              rowSpan={item.plans.length}
+                              className="align-top"
+                            >
+                              기대 효과
+                            </TableHead>
+                          </>
+                        ) : (
+                          <>
+                            <TableHead className="w-[120px]">등급</TableHead>
+                            <TableHead className="w-[150px]">
+                              가격(월/건)
+                            </TableHead>
+                            <TableHead>제공 기능 및 특징</TableHead>
+                            <TableHead>기대 효과</TableHead>
+                          </>
+                        )}
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {item.plans.map((plan, planIndex) => (
+                        <TableRow key={planIndex}>
+                          <TableCell className="font-medium">
+                            {plan.grade}
+                          </TableCell>
+                          <TableCell>{plan.price}</TableCell>
+                          <TableCell className="whitespace-pre-line wrap-break-word">
+                            {plan.features}
+                          </TableCell>
+                          {isImageProductionService ? (
+                            planIndex === 0 && (
+                              <TableCell
+                                rowSpan={item.plans.length}
+                                className="align-top whitespace-pre-line"
+                              >
+                                {item.allEffects?.map((effect, idx) => (
+                                  <div
+                                    key={idx}
+                                    className={idx > 0 ? "mt-2" : ""}
+                                  >
+                                    {effect}
+                                  </div>
+                                )) ||
+                                  item.plans.map((p, idx) => (
+                                    <div
+                                      key={idx}
+                                      className={idx > 0 ? "mt-2" : ""}
+                                    >
+                                      {p.effect}
+                                    </div>
+                                  ))}
+                              </TableCell>
+                            )
+                          ) : (
+                            <TableCell>{plan.effect}</TableCell>
+                          )}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </DialogContent>
     </Dialog>
   );
 }
-
