@@ -23,23 +23,20 @@ export async function GET(request: NextRequest) {
 
     let companyIds: string[] | null = null;
 
-    const selectedCategoryIds: string[] = [];
-    if (parentCategoryId) selectedCategoryIds.push(parentCategoryId);
-    if (middleCategoryId) selectedCategoryIds.push(middleCategoryId);
-    if (categoryId) selectedCategoryIds.push(categoryId);
+    // 카테고리 필터링 로직
+    if (parentCategoryId || middleCategoryId || categoryId) {
+      let targetCategoryIds: string[] = [];
 
-    if (selectedCategoryIds.length > 0) {
-      const categoryCompanyIdSets: Set<string>[] = [];
+      // 대분류가 선택된 경우: 해당 대분류의 모든 중분류 -> 소분류를 찾아야 함
+      if (parentCategoryId) {
+        // 1. 대분류의 모든 중분류 찾기
+        const { data: middleCategories } = await supabase
+          .from("categories")
+          .select("id")
+          .eq("parent_id", parentCategoryId)
+          .eq("is_active", true);
 
-      for (const catId of selectedCategoryIds) {
-        const { data: categoryData } = await supabase
-          .from("company_categories")
-          .select("company_id")
-          .eq("category_id", catId);
-
-        if (categoryData && categoryData.length > 0) {
-          categoryCompanyIdSets.push(new Set(categoryData.map((item) => item.company_id)));
-        } else {
+        if (!middleCategories || middleCategories.length === 0) {
           return NextResponse.json({
             companies: [],
             pagination: {
@@ -52,14 +49,86 @@ export async function GET(request: NextRequest) {
             },
           });
         }
+
+        const middleCategoryIds = middleCategories.map((c) => c.id);
+
+        // 2. 중분류가 추가로 선택된 경우 필터링
+        let targetMiddleIds = middleCategoryIds;
+        if (middleCategoryId && middleCategoryIds.includes(middleCategoryId)) {
+          targetMiddleIds = [middleCategoryId];
+        }
+
+        // 3. 각 중분류의 모든 소분류 찾기
+        const { data: childCategories } = await supabase
+          .from("categories")
+          .select("id")
+          .in("parent_id", targetMiddleIds)
+          .eq("is_active", true);
+
+        if (!childCategories || childCategories.length === 0) {
+          return NextResponse.json({
+            companies: [],
+            pagination: {
+              page: 1,
+              limit,
+              total: 0,
+              totalPages: 0,
+              hasNextPage: false,
+              hasPrevPage: false,
+            },
+          });
+        }
+
+        targetCategoryIds = childCategories.map((c) => c.id);
+
+        // 4. 소분류가 추가로 선택된 경우 필터링
+        if (categoryId && targetCategoryIds.includes(categoryId)) {
+          targetCategoryIds = [categoryId];
+        }
+      } else if (middleCategoryId) {
+        // 중분류만 선택된 경우: 해당 중분류의 모든 소분류 찾기
+        const { data: childCategories } = await supabase
+          .from("categories")
+          .select("id")
+          .eq("parent_id", middleCategoryId)
+          .eq("is_active", true);
+
+        if (!childCategories || childCategories.length === 0) {
+          return NextResponse.json({
+            companies: [],
+            pagination: {
+              page: 1,
+              limit,
+              total: 0,
+              totalPages: 0,
+              hasNextPage: false,
+              hasPrevPage: false,
+            },
+          });
+        }
+
+        targetCategoryIds = childCategories.map((c) => c.id);
+
+        // 소분류가 추가로 선택된 경우 필터링
+        if (categoryId && targetCategoryIds.includes(categoryId)) {
+          targetCategoryIds = [categoryId];
+        }
+      } else if (categoryId) {
+        // 소분류만 선택된 경우
+        targetCategoryIds = [categoryId];
       }
 
-      if (categoryCompanyIdSets.length > 0) {
-        companyIds = Array.from(categoryCompanyIdSets[0]).filter((companyId) =>
-          categoryCompanyIdSets.every((set) => set.has(companyId))
-        );
+      // 5. 해당 소분류들을 가진 기업들 찾기
+      if (targetCategoryIds.length > 0) {
+        const { data: categoryData } = await supabase
+          .from("company_categories")
+          .select("company_id")
+          .in("category_id", targetCategoryIds);
 
-        if (companyIds.length === 0) {
+        if (categoryData && categoryData.length > 0) {
+          // 중복 제거
+          companyIds = Array.from(new Set(categoryData.map((item) => item.company_id)));
+        } else {
           return NextResponse.json({
             companies: [],
             pagination: {

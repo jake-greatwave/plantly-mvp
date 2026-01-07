@@ -55,8 +55,11 @@ export const CategorySection = memo(function CategorySection({
   const [isLoadingChildren, setIsLoadingChildren] = useState(false);
   const [selectedParentId, setSelectedParentId] = useState<string>("");
   const [selectedMiddleId, setSelectedMiddleId] = useState<string>("");
-  const [categoryMap, setCategoryMap] = useState<Map<string, Category>>(new Map());
-  const [isCustomCategoryEnabled, setIsCustomCategoryEnabled] = useState<boolean>(false);
+  const [categoryMap, setCategoryMap] = useState<Map<string, Category>>(
+    new Map()
+  );
+  const [isCustomCategoryEnabled, setIsCustomCategoryEnabled] =
+    useState<boolean>(false);
   const [customCategoryInput, setCustomCategoryInput] = useState<string>("");
   const [isComposing, setIsComposing] = useState<boolean>(false);
 
@@ -91,7 +94,7 @@ export const CategorySection = memo(function CategorySection({
       setIsLoadingChildren(true);
       const categories = await getCategories(middleId);
       setChildCategories(categories);
-      
+
       setCategoryMap((prevMap) => {
         const newMap = new Map(prevMap);
         categories.forEach((cat) => {
@@ -99,7 +102,7 @@ export const CategorySection = memo(function CategorySection({
         });
         return newMap;
       });
-      
+
       return categories;
     } catch (error) {
       console.error("소분류 로드 오류:", error);
@@ -179,18 +182,33 @@ export const CategorySection = memo(function CategorySection({
 
   const canAddMore = useMemo(
     () =>
-      canAddCategoryTag(categoryIds.length + customCategories.length, userGrade, isAdmin) || isEnterprise,
-    [categoryIds.length, customCategories.length, userGrade, isAdmin, isEnterprise]
+      canAddCategoryTag(
+        categoryIds.length + customCategories.length,
+        userGrade,
+        isAdmin
+      ) || isEnterprise,
+    [
+      categoryIds.length,
+      customCategories.length,
+      userGrade,
+      isAdmin,
+      isEnterprise,
+    ]
   );
 
   const selectedCategories = useMemo(() => {
     const regularCategories = categoryIds
       .map((id) => {
         const category = categoryMap.get(id);
-        return category ? { id, name: category.category_name, isCustom: false } : null;
+        return category
+          ? { id, name: category.category_name, isCustom: false }
+          : null;
       })
-      .filter((cat): cat is { id: string; name: string; isCustom: boolean } => cat !== null);
-    
+      .filter(
+        (cat): cat is { id: string; name: string; isCustom: boolean } =>
+          cat !== null
+      );
+
     const customCategoriesList = customCategories.map((name) => ({
       id: `custom-${name}`,
       name,
@@ -220,14 +238,24 @@ export const CategorySection = memo(function CategorySection({
         onFieldChange("category_ids", [...categoryIds, categoryId]);
       }
     },
-    [categoryIds, customCategories.length, canAddMore, isAdmin, userGrade, limits.maxCategoryTags, onFieldChange]
+    [
+      categoryIds,
+      customCategories.length,
+      canAddMore,
+      isAdmin,
+      userGrade,
+      limits.maxCategoryTags,
+      onFieldChange,
+    ]
   );
 
   const handleRemoveCategory = useCallback(
     (categoryId: string) => {
       if (categoryId.startsWith("custom-")) {
         const categoryName = categoryId.replace("custom-", "");
-        const newCustomCategories = customCategories.filter((name) => name !== categoryName);
+        const newCustomCategories = customCategories.filter(
+          (name) => name !== categoryName
+        );
         onFieldChange("custom_categories", newCustomCategories);
       } else {
         onFieldChange(
@@ -243,9 +271,18 @@ export const CategorySection = memo(function CategorySection({
     (categoryId: string) => {
       if (categoryIds.includes(categoryId)) return false;
       if (canAddMore || isAdmin || isEnterprise) return false;
-      return categoryIds.length + customCategories.length >= limits.maxCategoryTags;
+      return (
+        categoryIds.length + customCategories.length >= limits.maxCategoryTags
+      );
     },
-    [categoryIds, customCategories, canAddMore, isAdmin, isEnterprise, limits.maxCategoryTags]
+    [
+      categoryIds,
+      customCategories,
+      canAddMore,
+      isAdmin,
+      isEnterprise,
+      limits.maxCategoryTags,
+    ]
   );
 
   return (
@@ -255,9 +292,7 @@ export const CategorySection = memo(function CategorySection({
       </div>
 
       <div className="space-y-2">
-        <Label>
-          대분류
-        </Label>
+        <Label>대분류</Label>
         {isLoadingParents ? (
           <div className="text-sm text-gray-500 py-2">로딩 중...</div>
         ) : (
@@ -284,9 +319,7 @@ export const CategorySection = memo(function CategorySection({
 
       {selectedParentId && (middleCategories.length > 0 || isLoadingMiddle) && (
         <div className="space-y-2">
-          <Label>
-            중분류
-          </Label>
+          <Label>중분류</Label>
           {isLoadingMiddle ? (
             <div className="text-sm text-gray-500 py-2">로딩 중...</div>
           ) : (
@@ -311,153 +344,174 @@ export const CategorySection = memo(function CategorySection({
         </div>
       )}
 
-      {selectedMiddleId && (childCategories.length > 0 || isLoadingChildren) && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label>
-              소분류 (실무 키워드 태그) <span className="text-red-500">*</span>
-            </Label>
-            {!isAdmin &&
-              !isEnterprise &&
-              userGrade === "basic" &&
-              limits.maxCategoryTags !== Infinity && (
-                <span className="text-xs text-gray-500">
-                  {categoryIds.length + customCategories.length}/{limits.maxCategoryTags}개 선택됨
-                </span>
-              )}
-          </div>
-          {isLoadingChildren ? (
-            <div className="text-sm text-gray-500 py-2">로딩 중...</div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 border border-gray-200 rounded-lg p-4">
-              {childCategories.map((category) => {
-                const isChecked = categoryIds.includes(category.id);
-                const isDisabled = isChildCategoryDisabled(category.id);
+      {selectedMiddleId &&
+        (childCategories.length > 0 || isLoadingChildren) && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>
+                소분류 (실무 키워드 태그){" "}
+                <span className="text-red-500">*</span>
+              </Label>
+              {!isAdmin &&
+                !isEnterprise &&
+                userGrade === "basic" &&
+                limits.maxCategoryTags !== Infinity && (
+                  <span className="text-xs text-gray-500">
+                    {categoryIds.length + customCategories.length}/
+                    {limits.maxCategoryTags}개 선택됨
+                  </span>
+                )}
+            </div>
+            {isLoadingChildren ? (
+              <div className="text-sm text-gray-500 py-2">로딩 중...</div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 border border-gray-200 rounded-lg p-4">
+                {childCategories.map((category) => {
+                  const isChecked = categoryIds.includes(category.id);
+                  const isDisabled = isChildCategoryDisabled(category.id);
 
-                return (
-                  <div
-                    key={category.id}
-                    className="flex items-center space-x-2"
-                  >
-                    <Checkbox
-                      id={`category-${category.id}`}
-                      checked={isChecked}
-                      onCheckedChange={() => handleChildCategoryToggle(category.id)}
-                      disabled={isDisabled}
-                    />
-                    <Label
-                      htmlFor={`category-${category.id}`}
-                      className={`text-sm font-normal flex-1 ${
-                        isDisabled
-                          ? "cursor-not-allowed opacity-50"
-                          : "cursor-pointer"
-                      }`}
+                  return (
+                    <div
+                      key={category.id}
+                      className="flex items-center space-x-2"
                     >
-                      {category.category_name}
-                    </Label>
-                  </div>
-                );
-              })}
-              <div className="flex items-center space-x-2 col-span-full pt-2 border-t border-gray-200">
-                <Checkbox
-                  id="custom-category-checkbox"
-                  checked={isCustomCategoryEnabled}
-                  onCheckedChange={(checked) => {
-                    setIsCustomCategoryEnabled(checked === true);
-                    if (!checked) {
-                      setCustomCategoryInput("");
-                    }
-                  }}
-                  disabled={
-                    !canAddMore &&
-                    !isAdmin &&
-                    userGrade === "basic" &&
-                    categoryIds.length + customCategories.length >= limits.maxCategoryTags
-                  }
-                />
-                <Label
-                  htmlFor="custom-category-checkbox"
-                  className="text-sm font-normal flex-1 cursor-pointer"
-                >
-                  기타: 직접입력
-                </Label>
-              </div>
-              {isCustomCategoryEnabled && (
-                <div className="col-span-full flex gap-1.5">
-                  <Input
-                    type="text"
-                    placeholder="소분류를 직접 입력하세요"
-                    value={customCategoryInput}
-                    onChange={(e) => setCustomCategoryInput(e.target.value)}
-                    onCompositionStart={() => setIsComposing(true)}
-                    onCompositionEnd={() => setIsComposing(false)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !isComposing && customCategoryInput.trim()) {
-                        e.preventDefault();
-                        const trimmed = customCategoryInput.trim();
-                        if (!customCategories.includes(trimmed)) {
-                          if (
-                            canAddMore ||
-                            isAdmin ||
-                            isEnterprise ||
-                            categoryIds.length + customCategories.length < limits.maxCategoryTags
-                          ) {
-                            onFieldChange("custom_categories", [...customCategories, trimmed]);
-                            setCustomCategoryInput("");
-                          }
+                      <Checkbox
+                        id={`category-${category.id}`}
+                        checked={isChecked}
+                        onCheckedChange={() =>
+                          handleChildCategoryToggle(category.id)
                         }
-                      }
-                    }}
-                    className="flex-1 h-8 text-sm"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (customCategoryInput.trim()) {
-                        const trimmed = customCategoryInput.trim();
-                        if (!customCategories.includes(trimmed)) {
-                          if (
-                            canAddMore ||
-                            isAdmin ||
-                            isEnterprise ||
-                            categoryIds.length + customCategories.length < limits.maxCategoryTags
-                          ) {
-                            onFieldChange("custom_categories", [...customCategories, trimmed]);
-                            setCustomCategoryInput("");
-                          }
-                        }
+                        disabled={isDisabled}
+                      />
+                      <Label
+                        htmlFor={`category-${category.id}`}
+                        className={`text-sm font-normal flex-1 ${
+                          isDisabled
+                            ? "cursor-not-allowed opacity-50"
+                            : "cursor-pointer"
+                        }`}
+                      >
+                        {category.category_name}
+                      </Label>
+                    </div>
+                  );
+                })}
+                <div className="flex items-center space-x-2 col-span-full pt-2 border-t border-gray-200">
+                  <Checkbox
+                    id="custom-category-checkbox"
+                    checked={isCustomCategoryEnabled}
+                    onCheckedChange={(checked) => {
+                      setIsCustomCategoryEnabled(checked === true);
+                      if (!checked) {
+                        setCustomCategoryInput("");
                       }
                     }}
                     disabled={
-                      !customCategoryInput.trim() ||
-                      customCategories.includes(customCategoryInput.trim()) ||
-                      (!canAddMore &&
-                        !isAdmin &&
-                        userGrade === "basic" &&
-                        categoryIds.length + customCategories.length >= limits.maxCategoryTags)
+                      !canAddMore &&
+                      !isAdmin &&
+                      userGrade === "basic" &&
+                      categoryIds.length + customCategories.length >=
+                        limits.maxCategoryTags
                     }
-                    className="px-2.5 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-1"
+                  />
+                  <Label
+                    htmlFor="custom-category-checkbox"
+                    className="text-sm font-normal flex-1 cursor-pointer"
                   >
-                    <Plus className="w-3.5 h-3.5" />
-                    추가
-                  </button>
+                    기타: 직접입력
+                  </Label>
                 </div>
+                {isCustomCategoryEnabled && (
+                  <div className="col-span-full flex gap-1.5">
+                    <Input
+                      type="text"
+                      placeholder="소분류를 직접 입력하세요"
+                      value={customCategoryInput}
+                      onChange={(e) => setCustomCategoryInput(e.target.value)}
+                      onCompositionStart={() => setIsComposing(true)}
+                      onCompositionEnd={() => setIsComposing(false)}
+                      onKeyDown={(e) => {
+                        if (
+                          e.key === "Enter" &&
+                          !isComposing &&
+                          customCategoryInput.trim()
+                        ) {
+                          e.preventDefault();
+                          const trimmed = customCategoryInput.trim();
+                          if (!customCategories.includes(trimmed)) {
+                            if (
+                              canAddMore ||
+                              isAdmin ||
+                              isEnterprise ||
+                              categoryIds.length + customCategories.length <
+                                limits.maxCategoryTags
+                            ) {
+                              onFieldChange("custom_categories", [
+                                ...customCategories,
+                                trimmed,
+                              ]);
+                              setCustomCategoryInput("");
+                            }
+                          }
+                        }
+                      }}
+                      className="flex-1 h-8 text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (customCategoryInput.trim()) {
+                          const trimmed = customCategoryInput.trim();
+                          if (!customCategories.includes(trimmed)) {
+                            if (
+                              canAddMore ||
+                              isAdmin ||
+                              isEnterprise ||
+                              categoryIds.length + customCategories.length <
+                                limits.maxCategoryTags
+                            ) {
+                              onFieldChange("custom_categories", [
+                                ...customCategories,
+                                trimmed,
+                              ]);
+                              setCustomCategoryInput("");
+                            }
+                          }
+                        }
+                      }}
+                      disabled={
+                        !customCategoryInput.trim() ||
+                        customCategories.includes(customCategoryInput.trim()) ||
+                        (!canAddMore &&
+                          !isAdmin &&
+                          userGrade === "basic" &&
+                          categoryIds.length + customCategories.length >=
+                            limits.maxCategoryTags)
+                      }
+                      className="px-2.5 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-1"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      추가
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+            {!isAdmin &&
+              userGrade === "basic" &&
+              !isEnterprise &&
+              categoryIds.length + customCategories.length >=
+                limits.maxCategoryTags && (
+                <UpgradePrompt
+                  feature="소분류 태그"
+                  upgradeSource="소분류 태그"
+                  customMessage="태그는 최대 2개까지 가능하며, 추가 등록은 Enterprise 등급에서 가능합니다."
+                  variant="inline"
+                  onUpgradeSuccess={onUpgradeSuccess}
+                />
               )}
-            </div>
-          )}
-          {!isAdmin && 
-           userGrade === "basic" && 
-           !isEnterprise &&
-           categoryIds.length + customCategories.length >= limits.maxCategoryTags && (
-            <UpgradePrompt
-              feature="소분류 태그"
-              upgradeSource="소분류 태그"
-              variant="inline"
-              onUpgradeSuccess={onUpgradeSuccess}
-            />
-          )}
-        </div>
-      )}
+          </div>
+        )}
 
       {selectedCategories.length > 0 && (
         <div className="space-y-2">
@@ -490,7 +544,10 @@ export const CategorySection = memo(function CategorySection({
           {INDUSTRIES.map((industry, index) => {
             const isChecked = (data.industries || []).includes(industry);
             return (
-              <div key={`industry-${index}-${industry}`} className="flex items-center space-x-2">
+              <div
+                key={`industry-${index}-${industry}`}
+                className="flex items-center space-x-2"
+              >
                 <Checkbox
                   id={`industry-${index}-${industry}`}
                   checked={isChecked}

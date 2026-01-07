@@ -1,30 +1,40 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Lock } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { UpgradeSurveyDialog } from './upgrade-survey-dialog'
+import { useState } from "react";
+import { Lock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { UpgradeSurveyDialog } from "./upgrade-survey-dialog";
 
 interface UpgradePromptProps {
-  feature: string
-  upgradeSource?: string
-  children?: React.ReactNode
-  variant?: 'inline' | 'overlay'
-  onUpgradeSuccess?: () => void
+  feature: string;
+  upgradeSource?: string;
+  customMessage?: string;
+  children?: React.ReactNode;
+  variant?: "inline" | "overlay";
+  onUpgradeSuccess?: () => void;
 }
 
-export function UpgradePrompt({ feature, upgradeSource, children, variant = 'inline', onUpgradeSuccess }: UpgradePromptProps) {
-  const [surveyOpen, setSurveyOpen] = useState(false)
+export function UpgradePrompt({
+  feature,
+  upgradeSource,
+  customMessage,
+  children,
+  variant = "inline",
+  onUpgradeSuccess,
+}: UpgradePromptProps) {
+  const [surveyOpen, setSurveyOpen] = useState(false);
 
   const handleSurveySuccess = () => {
-    onUpgradeSuccess?.()
-  }
+    onUpgradeSuccess?.();
+  };
 
-  if (variant === 'overlay') {
+  if (variant === "overlay") {
     return (
       <>
         <div className="relative">
-          <div className="opacity-50 pointer-events-none select-none">{children}</div>
+          <div className="opacity-50 pointer-events-none select-none">
+            {children}
+          </div>
           <div className="absolute inset-0 flex items-center justify-center bg-white/90 rounded-lg border-2 border-dashed border-gray-300 z-10">
             <Button
               type="button"
@@ -45,21 +55,23 @@ export function UpgradePrompt({ feature, upgradeSource, children, variant = 'inl
           onSuccess={handleSurveySuccess}
         />
       </>
-    )
+    );
   }
 
   return (
     <>
-      <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-        <Lock className="w-4 h-4 text-amber-600 flex-shrink-0" />
-        <div className="flex-1 text-sm text-amber-800">
-          {feature} 기능은 Enterprise 등급에서 사용 가능합니다.
+      <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+        <Lock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+        <div className="flex-1 text-sm text-amber-800 leading-relaxed">
+          {children ||
+            customMessage ||
+            `${feature} 기능은 Enterprise 등급에서 사용 가능합니다.`}
         </div>
         <Button
           type="button"
           size="sm"
           variant="outline"
-          className="border-amber-300 text-amber-700 hover:bg-amber-100"
+          className="border-amber-300 text-amber-700 hover:bg-amber-100 shrink-0"
           onClick={() => setSurveyOpen(true)}
         >
           업그레이드
@@ -73,6 +85,5 @@ export function UpgradePrompt({ feature, upgradeSource, children, variant = 'inl
         onSuccess={handleSurveySuccess}
       />
     </>
-  )
+  );
 }
-

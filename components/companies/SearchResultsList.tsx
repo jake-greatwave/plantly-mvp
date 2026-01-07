@@ -51,6 +51,7 @@ export function SearchResultsList() {
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedCategoryName, setSelectedCategoryName] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -67,6 +68,24 @@ export function SearchResultsList() {
         const countries = searchParams.get("countries");
         const industries = searchParams.get("industries");
         const isFeatured = searchParams.get("is_featured");
+
+        // 선택된 카테고리 이름 가져오기
+        if (parentCategoryId) {
+          try {
+            const categoryResponse = await fetch(`/api/categories/${parentCategoryId}`);
+            if (categoryResponse.ok) {
+              const category = await categoryResponse.json();
+              setSelectedCategoryName(category.category_name);
+            } else {
+              setSelectedCategoryName(null);
+            }
+          } catch (err) {
+            console.error("카테고리 정보를 가져오는 중 오류:", err);
+            setSelectedCategoryName(null);
+          }
+        } else {
+          setSelectedCategoryName(null);
+        }
 
         if (search) params.set("search", search);
         params.set("page", page);
@@ -110,6 +129,13 @@ export function SearchResultsList() {
 
   return (
     <>
+      {selectedCategoryName && (
+        <div className="mb-4 text-left">
+          <h1 className="text-2xl font-bold text-gray-900">
+            {selectedCategoryName}
+          </h1>
+        </div>
+      )}
       <div className="mb-6">
         <SearchBar />
       </div>
