@@ -17,7 +17,6 @@ export async function GET(request: NextRequest) {
     const regionId = searchParams.get("region_id");
     const countries = searchParams.get("countries")?.split(",").filter(Boolean) || [];
     const industries = searchParams.get("industries")?.split(",").filter(Boolean) || [];
-    const isVerified = searchParams.get("is_verified");
     const isFeatured = searchParams.get("is_featured");
 
     const supabase = await createClient();
@@ -215,7 +214,9 @@ export async function GET(request: NextRequest) {
     if (search) {
       const escapedSearch = search.replace(/[%_\\]/g, "\\$&");
       const searchTerm = `%${escapedSearch}%`;
+      const searchLower = search.toLowerCase();
       
+      // 1. 카테고리 검색
       const { data: categoryMatches } = await supabase
         .from("categories")
         .select("id")
@@ -223,8 +224,7 @@ export async function GET(request: NextRequest) {
         .eq("is_active", true);
 
       const categoryIds = categoryMatches?.map((c) => c.id) || [];
-
-      let searchCompanyIds: string[] | null = null;
+      let categoryCompanyIds: string[] = [];
 
       if (categoryIds.length > 0) {
         const { data: categoryCompanyData } = await supabase
@@ -233,10 +233,11 @@ export async function GET(request: NextRequest) {
           .in("category_id", categoryIds);
 
         if (categoryCompanyData && categoryCompanyData.length > 0) {
-          searchCompanyIds = categoryCompanyData.map((item) => item.company_id);
+          categoryCompanyIds = categoryCompanyData.map((item) => item.company_id);
         }
       }
 
+      // 2. 태그 검색
       const { data: tagMatches } = await supabase
         .from("company_tags")
         .select("company_id")
@@ -244,12 +245,111 @@ export async function GET(request: NextRequest) {
 
       const tagCompanyIds = tagMatches?.map((t) => t.company_id) || [];
 
-      const allSearchCompanyIds = new Set<string>();
-      if (searchCompanyIds) {
-        searchCompanyIds.forEach((id) => allSearchCompanyIds.add(id));
+      // 3. JSON 배열 필드 검색 (equipment, materials, certifications, industries)
+      // 필터링 조건이 있으면 먼저 적용
+      let jsonSearchQuery = supabase
+        .from("companies")
+        .select("id, equipment, materials, certifications, industries")
+        .eq("is_verified", true); // 항상 인증된 기업만 검색
+      
+      if (companyIds && companyIds.length > 0) {
+        jsonSearchQuery = jsonSearchQuery.in("id", companyIds);
       }
-      tagCompanyIds.forEach((id) => allSearchCompanyIds.add(id));
+      
+      const { data: allCompaniesForJsonSearch } = await jsonSearchQuery;
+      
+      const jsonMatchedIds: string[] = [];
+      if (allCompaniesForJsonSearch) {
+        for (const company of allCompaniesForJsonSearch) {
+          // equipment (보유설비) 검색
+          if (company.equipment) {
+            try {
+              const equipmentList = Array.isArray(company.equipment)
+                ? company.equipment
+                : typeof company.equipment === "string"
+                ? JSON.parse(company.equipment)
+                : Object.values(company.equipment);
+              
+              if (equipmentList.some((item: any) => 
+                String(item).toLowerCase().includes(searchLower)
+              )) {
+                jsonMatchedIds.push(company.id);
+                continue;
+              }
+            } catch (e) {
+              // JSON 파싱 실패 시 무시
+            }
+          }
+          
+          // materials (대응가능소재) 검색
+          if (company.materials) {
+            try {
+              const materialsList = Array.isArray(company.materials)
+                ? company.materials
+                : typeof company.materials === "string"
+                ? JSON.parse(company.materials)
+                : Object.values(company.materials);
+              
+              if (materialsList.some((item: any) => 
+                String(item).toLowerCase().includes(searchLower)
+              )) {
+                jsonMatchedIds.push(company.id);
+                continue;
+              }
+            } catch (e) {
+              // JSON 파싱 실패 시 무시
+            }
+          }
+          
+          // certifications (인증현황) 검색
+          if (company.certifications) {
+            try {
+              const certList = Array.isArray(company.certifications)
+                ? company.certifications
+                : typeof company.certifications === "string"
+                ? JSON.parse(company.certifications)
+                : Object.values(company.certifications);
+              
+              if (certList.some((item: any) => 
+                String(item).toLowerCase().includes(searchLower)
+              )) {
+                jsonMatchedIds.push(company.id);
+                continue;
+              }
+            } catch (e) {
+              // JSON 파싱 실패 시 무시
+            }
+          }
+          
+          // industries (주력산업군) 검색
+          if (company.industries) {
+            try {
+              const industriesList = Array.isArray(company.industries)
+                ? company.industries
+                : typeof company.industries === "string"
+                ? JSON.parse(company.industries)
+                : Object.values(company.industries);
+              
+              if (industriesList.some((item: any) => 
+                String(item).toLowerCase().includes(searchLower)
+              )) {
+                jsonMatchedIds.push(company.id);
+                continue;
+              }
+            } catch (e) {
+              // JSON 파싱 실패 시 무시
+            }
+          }
+        }
+      }
 
+      // 4. 모든 검색 결과 ID 통합
+      const allSearchCompanyIds = new Set<string>();
+      categoryCompanyIds.forEach((id) => allSearchCompanyIds.add(id));
+      tagCompanyIds.forEach((id) => allSearchCompanyIds.add(id));
+      jsonMatchedIds.forEach((id) => allSearchCompanyIds.add(id));
+
+      // 5. 텍스트 필드 검색 조건 구성
       const searchConditions: string[] = [];
       
       if (allSearchCompanyIds.size > 0) {
@@ -257,6 +357,7 @@ export async function GET(request: NextRequest) {
         searchConditions.push(`id.in.(${idsArray.join(",")})`);
       }
 
+      // 직접 검색 가능한 텍스트 필드들
       const textFields = [
         "company_name",
         "intro_title",
@@ -264,6 +365,12 @@ export async function GET(request: NextRequest) {
         "project_title",
         "achievements",
         "partners",
+        "ceo_name",
+        "address",
+        "address_detail",
+        "lead_time",
+        "as_info",
+        "content", // 자유게시글
       ];
 
       const escapedSearchTerm = searchTerm
@@ -277,14 +384,14 @@ export async function GET(request: NextRequest) {
         searchConditions.push(`${field}.ilike.${escapedSearchTerm}`);
       }
 
+      // 6. 검색 조건 적용
       if (searchConditions.length > 0) {
         query = query.or(searchConditions.join(","));
       }
     }
 
-    if (isVerified === "true") {
-      query = query.eq("is_verified", true);
-    }
+    // 항상 인증된 기업만 표시
+    query = query.eq("is_verified", true);
 
     if (isFeatured === "true") {
       query = query.eq("is_featured", true);

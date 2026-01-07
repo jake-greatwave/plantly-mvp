@@ -10,6 +10,8 @@ export interface AdminCompany {
   industries: any;
   is_verified: boolean;
   is_featured: boolean;
+  is_spotlight: boolean;
+  spotlight_order: number | null;
   view_count: number;
   created_at: string;
   updated_at: string;

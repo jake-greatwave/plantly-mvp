@@ -37,6 +37,8 @@ export async function GET(request: NextRequest) {
         industries,
         is_verified,
         is_featured,
+        is_spotlight,
+        spotlight_order,
         view_count,
         created_at,
         updated_at,

@@ -23,7 +23,6 @@ interface SearchFiltersProps {
     subCategory: string;
     industries: string[];
     selectedCountries: string[];
-    isVerified: boolean;
     isFeatured: boolean;
   }) => void;
 }
@@ -42,7 +41,6 @@ export function SearchFilters({ onFilterChange, onFiltersReady }: SearchFiltersP
   const urlSubCategory = searchParams.get("category_id") || "";
   const urlIndustries = searchParams.get("industries")?.split(",").filter(Boolean) || [];
   const urlCountries = searchParams.get("countries")?.split(",").filter(Boolean) || [];
-  const urlIsVerified = searchParams.get("is_verified") === "true";
   const urlIsFeatured = searchParams.get("is_featured") === "true";
 
   const [parentCategory, setParentCategory] = useState(urlParentCategory);
@@ -50,7 +48,6 @@ export function SearchFilters({ onFilterChange, onFiltersReady }: SearchFiltersP
   const [subCategory, setSubCategory] = useState(urlSubCategory);
   const [industries, setIndustries] = useState<string[]>(urlIndustries);
   const [selectedCountries, setSelectedCountries] = useState<string[]>(urlCountries);
-  const [isVerified, setIsVerified] = useState(urlIsVerified);
   const [isFeatured, setIsFeatured] = useState(urlIsFeatured);
 
   useEffect(() => {
@@ -59,9 +56,8 @@ export function SearchFilters({ onFilterChange, onFiltersReady }: SearchFiltersP
     setSubCategory(urlSubCategory);
     setIndustries(urlIndustries);
     setSelectedCountries(urlCountries);
-    setIsVerified(urlIsVerified);
     setIsFeatured(urlIsFeatured);
-  }, [urlParentCategory, urlMiddleCategory, urlSubCategory, urlIndustries.join(","), urlCountries.join(","), urlIsVerified, urlIsFeatured]);
+  }, [urlParentCategory, urlMiddleCategory, urlSubCategory, urlIndustries.join(","), urlCountries.join(","), urlIsFeatured]);
 
   useEffect(() => {
     if (onFiltersReady) {
@@ -71,11 +67,10 @@ export function SearchFilters({ onFilterChange, onFiltersReady }: SearchFiltersP
         subCategory,
         industries,
         selectedCountries,
-        isVerified,
         isFeatured,
       });
     }
-  }, [parentCategory, middleCategory, subCategory, industries, selectedCountries, isVerified, isFeatured, onFiltersReady]);
+  }, [parentCategory, middleCategory, subCategory, industries, selectedCountries, isFeatured, onFiltersReady]);
 
   useEffect(() => {
     loadParentCategories();
@@ -146,9 +141,6 @@ export function SearchFilters({ onFilterChange, onFiltersReady }: SearchFiltersP
     if (selectedCountries.length > 0) {
       params.set("countries", selectedCountries.join(","));
     }
-    if (isVerified) {
-      params.set("is_verified", "true");
-    }
     if (isFeatured) {
       params.set("is_featured", "true");
     }
@@ -180,10 +172,6 @@ export function SearchFilters({ onFilterChange, onFiltersReady }: SearchFiltersP
     setSelectedCountries(values);
   };
 
-  const handleIsVerifiedChange = (checked: boolean) => {
-    setIsVerified(checked);
-  };
-
   const handleIsFeaturedChange = (checked: boolean) => {
     setIsFeatured(checked);
   };
@@ -204,7 +192,6 @@ export function SearchFilters({ onFilterChange, onFiltersReady }: SearchFiltersP
     subCategory ||
     industries.length > 0 ||
     selectedCountries.length > 0 ||
-    isVerified ||
     isFeatured;
 
   return (
@@ -305,23 +292,6 @@ export function SearchFilters({ onFilterChange, onFiltersReady }: SearchFiltersP
             onChange={handleCountriesChange}
             columns={2}
           />
-        </div>
-
-        <div className="space-y-1">
-          <Label className="text-xs">인증 여부</Label>
-          <div className="flex items-center space-x-2 pt-1">
-            <Checkbox
-              id="is_verified"
-              checked={isVerified}
-              onCheckedChange={handleIsVerifiedChange}
-            />
-            <label
-              htmlFor="is_verified"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-            >
-              인증 기업만
-            </label>
-          </div>
         </div>
 
         <div className="space-y-1">
