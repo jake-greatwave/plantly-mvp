@@ -27,7 +27,7 @@ export async function FeaturedCompanies() {
           </Button>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {featuredCompanies.map((company: any) => {
             const mainImage = company.company_images?.find((img: any) => img.image_type === 'main')?.image_url || null
             

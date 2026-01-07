@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Mail,
   Phone,
@@ -16,87 +16,82 @@ import {
   Package,
   Award,
   Briefcase,
-} from 'lucide-react'
-import { formatAddressShort } from '@/lib/utils/address'
-import type { CompanyDetail } from '@/lib/types/company-detail.types'
+} from "lucide-react";
+import { formatAddressShort } from "@/lib/utils/address";
+import type { CompanyDetail } from "@/lib/types/company-detail.types";
 
 interface CompanyOverviewProps {
-  company: CompanyDetail
-  brandColor: string
+  company: CompanyDetail;
+  brandColor: string;
 }
 
 export function CompanyOverview({ company, brandColor }: CompanyOverviewProps) {
   const industries = company.industries
     ? Array.isArray(company.industries)
       ? company.industries
-      : typeof company.industries === 'string'
+      : typeof company.industries === "string"
       ? JSON.parse(company.industries)
       : Object.values(company.industries)
-    : []
+    : [];
 
   const certifications = company.certifications
     ? Array.isArray(company.certifications)
       ? company.certifications
-      : typeof company.certifications === 'string'
+      : typeof company.certifications === "string"
       ? JSON.parse(company.certifications)
       : Object.values(company.certifications)
-    : []
+    : [];
 
   const equipment = company.equipment
     ? Array.isArray(company.equipment)
       ? company.equipment
-      : typeof company.equipment === 'string'
+      : typeof company.equipment === "string"
       ? JSON.parse(company.equipment)
       : Object.values(company.equipment)
-    : []
+    : [];
 
   const materials = company.materials
     ? Array.isArray(company.materials)
       ? company.materials
-      : typeof company.materials === 'string'
+      : typeof company.materials === "string"
       ? JSON.parse(company.materials)
       : Object.values(company.materials)
-    : []
+    : [];
 
   const countries =
     company.company_regions
-      ?.filter((cr) => cr.regions?.region_type === 'country')
+      ?.filter((cr) => cr.regions?.region_type === "country")
       .map((cr) => cr.regions?.region_name)
-      .filter(Boolean) || []
+      .filter(Boolean) || [];
 
   const pricingLabels: Record<string, string> = {
-    fixed: '고정 단가제',
-    consultation: '상담 후 결정',
-    project_based: '프로젝트별 상이',
-  }
+    fixed: "고정 단가제",
+    consultation: "상담 후 결정",
+    project_based: "프로젝트별 상이",
+  };
 
   const trlLabels: Record<string, string> = {
-    prototype: '프로토타입',
-    mass_production: '양산 적용 가능',
-    global_standard: '글로벌 표준',
-  }
+    prototype: "프로토타입",
+    mass_production: "양산 적용 가능",
+    global_standard: "글로벌 표준",
+  };
 
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return '-'
-    return new Date(dateString).toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-    })
-  }
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "long",
+    });
+  };
 
   return (
     <Card className="p-6">
-      <h2
-        className="text-2xl font-bold mb-6"
-        style={{ color: brandColor }}
-      >
-        기업개요
-      </h2>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4 pb-6 border-b border-gray-200">
           <div>
-            <h3 className="text-lg font-semibold mb-3 text-gray-900">기본 정보</h3>
+            <h3 className="text-lg font-semibold mb-3 text-gray-900">
+              기본 정보
+            </h3>
             <div className="space-y-3">
               {company.establishment_date && (
                 <div className="flex items-start gap-3">
@@ -184,7 +179,8 @@ export function CompanyOverview({ company, brandColor }: CompanyOverviewProps) {
                   <p className="text-sm text-gray-500 mb-1">담당자</p>
                   <p className="text-sm font-medium text-gray-900">
                     {company.manager_name}
-                    {company.manager_position && ` (${company.manager_position})`}
+                    {company.manager_position &&
+                      ` (${company.manager_position})`}
                   </p>
                 </div>
               )}
@@ -233,7 +229,9 @@ export function CompanyOverview({ company, brandColor }: CompanyOverviewProps) {
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-3 text-gray-900">거래 조건</h3>
+            <h3 className="text-lg font-semibold mb-3 text-gray-900">
+              거래 조건
+            </h3>
             <div className="space-y-3">
               {countries.length > 0 && (
                 <div>
@@ -270,7 +268,8 @@ export function CompanyOverview({ company, brandColor }: CompanyOverviewProps) {
                   <div>
                     <p className="text-sm text-gray-500">가격 정책</p>
                     <p className="text-sm font-medium text-gray-900">
-                      {pricingLabels[company.pricing_type] || company.pricing_type}
+                      {pricingLabels[company.pricing_type] ||
+                        company.pricing_type}
                     </p>
                   </div>
                 </div>
@@ -293,11 +292,15 @@ export function CompanyOverview({ company, brandColor }: CompanyOverviewProps) {
 
         <div className="space-y-4 pb-6 border-b border-gray-200 md:border-b-0 md:border-r border-gray-200 md:pr-6">
           <div>
-            <h3 className="text-lg font-semibold mb-3 text-gray-900">기술 정보</h3>
+            <h3 className="text-lg font-semibold mb-3 text-gray-900">
+              기술 정보
+            </h3>
             <div className="space-y-3">
               {company.intro_content && (
                 <div>
-                  <h4 className="text-sm font-medium text-gray-600 mb-1.5">회사 소개</h4>
+                  <h4 className="text-sm font-medium text-gray-600 mb-1.5">
+                    회사 소개
+                  </h4>
                   <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap line-clamp-3">
                     {company.intro_content}
                   </p>
@@ -306,7 +309,9 @@ export function CompanyOverview({ company, brandColor }: CompanyOverviewProps) {
 
               {company.trl_level && (
                 <div>
-                  <h4 className="text-sm font-medium text-gray-600 mb-1.5">기술 성숙도</h4>
+                  <h4 className="text-sm font-medium text-gray-600 mb-1.5">
+                    기술 성숙도
+                  </h4>
                   <Badge
                     variant="outline"
                     className="text-xs px-2 py-1"
@@ -324,17 +329,22 @@ export function CompanyOverview({ company, brandColor }: CompanyOverviewProps) {
                     주요 장비
                   </h4>
                   <div className="flex flex-wrap gap-1.5">
-                    {equipment.slice(0, 5).map((item: unknown, index: number) => (
+                    {equipment
+                      .slice(0, 5)
+                      .map((item: unknown, index: number) => (
+                        <Badge
+                          key={index}
+                          variant="secondary"
+                          className="text-xs bg-gray-100 text-gray-700"
+                        >
+                          {String(item)}
+                        </Badge>
+                      ))}
+                    {equipment.length > 5 && (
                       <Badge
-                        key={index}
                         variant="secondary"
                         className="text-xs bg-gray-100 text-gray-700"
                       >
-                        {String(item)}
-                      </Badge>
-                    ))}
-                    {equipment.length > 5 && (
-                      <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-700">
                         +{equipment.length - 5}
                       </Badge>
                     )}
@@ -349,17 +359,22 @@ export function CompanyOverview({ company, brandColor }: CompanyOverviewProps) {
                     취급 재료
                   </h4>
                   <div className="flex flex-wrap gap-1.5">
-                    {materials.slice(0, 5).map((item: unknown, index: number) => (
+                    {materials
+                      .slice(0, 5)
+                      .map((item: unknown, index: number) => (
+                        <Badge
+                          key={index}
+                          variant="secondary"
+                          className="text-xs bg-gray-100 text-gray-700"
+                        >
+                          {String(item)}
+                        </Badge>
+                      ))}
+                    {materials.length > 5 && (
                       <Badge
-                        key={index}
                         variant="secondary"
                         className="text-xs bg-gray-100 text-gray-700"
                       >
-                        {String(item)}
-                      </Badge>
-                    ))}
-                    {materials.length > 5 && (
-                      <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-700">
                         +{materials.length - 5}
                       </Badge>
                     )}
@@ -379,7 +394,9 @@ export function CompanyOverview({ company, brandColor }: CompanyOverviewProps) {
             <div className="space-y-3">
               {company.project_title && (
                 <div>
-                  <h4 className="text-sm font-medium text-gray-600 mb-1.5">주요 프로젝트</h4>
+                  <h4 className="text-sm font-medium text-gray-600 mb-1.5">
+                    주요 프로젝트
+                  </h4>
                   <p className="text-sm text-gray-700 leading-relaxed line-clamp-2">
                     {company.project_title}
                   </p>
@@ -400,7 +417,9 @@ export function CompanyOverview({ company, brandColor }: CompanyOverviewProps) {
 
               {company.partners && (
                 <div>
-                  <h4 className="text-sm font-medium text-gray-600 mb-1.5">주요 파트너</h4>
+                  <h4 className="text-sm font-medium text-gray-600 mb-1.5">
+                    주요 파트너
+                  </h4>
                   <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap line-clamp-2">
                     {company.partners}
                   </p>
@@ -411,6 +430,5 @@ export function CompanyOverview({ company, brandColor }: CompanyOverviewProps) {
         </div>
       </div>
     </Card>
-  )
+  );
 }
-

@@ -63,7 +63,7 @@ function RecentCompanyCard({ company }: RecentCompanyCardProps) {
       className="bg-white border-gray-200 overflow-hidden hover:border-blue-600 hover:shadow-lg transition-all cursor-pointer"
     >
       <div className="flex">
-        <div className="relative w-40 h-40 flex-shrink-0 bg-white overflow-hidden p-3">
+        <div className="relative w-28 h-28 flex-shrink-0 bg-white overflow-hidden p-2">
           {mainImage ? (
             <img
               src={mainImage}
@@ -71,45 +71,45 @@ function RecentCompanyCard({ company }: RecentCompanyCardProps) {
               className="w-full h-full object-cover rounded"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 rounded">
-              <Building2 className="w-12 h-12 text-gray-400" />
+            <div className="w-full h-full flex items-center justify-center bg-white rounded">
+              <Building2 className="w-8 h-8 text-gray-400" />
             </div>
           )}
           {company.is_featured && (
-            <div className="absolute top-2 right-2">
-              <Badge className="bg-yellow-500 text-white text-sm px-2 py-1">
-                <Star className="w-3 h-3 mr-1" />
+            <div className="absolute top-1 right-1">
+              <Badge className="bg-yellow-500 text-white text-xs px-1.5 py-0.5">
+                <Star className="w-2.5 h-2.5 mr-0.5" />
                 추천
               </Badge>
             </div>
           )}
         </div>
 
-        <div className="p-4 flex-1 flex flex-col min-w-0">
-          <h3 className="text-base font-semibold text-gray-900 mb-1.5 line-clamp-1">
+        <div className="p-3 flex-1 flex flex-col min-w-0">
+          <h3 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-1">
             {company.company_name}
           </h3>
 
           {company.intro_title && (
-            <p className="text-gray-700 text-sm mb-2.5 line-clamp-2">
+            <p className="text-gray-700 text-xs mb-2 line-clamp-2">
               {company.intro_title}
             </p>
           )}
 
-          <div className="space-y-1.5 mb-2.5 flex-1">
+          <div className="space-y-1 mb-2 flex-1">
             {company.address && (
-              <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <div className="flex items-center gap-1 text-xs text-gray-600">
+                <MapPin className="w-3 h-3 text-gray-400 flex-shrink-0" />
                 <span className="line-clamp-1">{formatAddressShort(company.address)}</span>
               </div>
             )}
             {industryList.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-1">
                 {industryList.slice(0, 2).map((industry: any, index: number) => (
                   <Badge
                     key={index}
                     variant="secondary"
-                    className="bg-blue-50 text-blue-700 text-sm px-2 py-0.5"
+                    className="bg-blue-50 text-blue-700 text-xs px-1.5 py-0.5"
                   >
                     {String(industry)}
                   </Badge>
@@ -119,17 +119,25 @@ function RecentCompanyCard({ company }: RecentCompanyCardProps) {
           </div>
 
           {categories.length > 0 && (
-            <div className="pt-2.5 border-t border-gray-200">
-              <div className="flex flex-wrap gap-1.5">
-                {categories.slice(0, 2).map((category, index) => (
+            <div className="pt-2 border-t border-gray-200">
+              <div className="flex flex-wrap gap-0.5">
+                {categories.slice(0, 3).map((category, index) => (
                   <Badge
                     key={index}
                     variant="outline"
-                    className="text-sm border-gray-300 text-gray-600 px-2 py-0.5"
+                    className="text-[10px] border-gray-300 text-gray-600 px-1 py-0.5"
                   >
-                    {category}
+                    #{category}
                   </Badge>
                 ))}
+                {categories.length > 3 && (
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] border-gray-300 text-gray-600 px-1 py-0.5"
+                  >
+                    +{categories.length - 3}
+                  </Badge>
+                )}
               </div>
             </div>
           )}
@@ -200,7 +208,7 @@ export function RecentCompanies() {
     <section className="bg-white py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-gray-900 mb-6 text-center text-2xl font-bold">최근 등록 기업</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {companies.map((company) => (
             <RecentCompanyCard key={company.id} company={company} />
           ))}

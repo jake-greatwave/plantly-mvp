@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { CompanyHero } from "@/components/company-detail/CompanyHero";
-import { CompanyInfo } from "@/components/company-detail/CompanyInfo";
-import { CompanyPortfolio } from "@/components/company-detail/CompanyPortfolio";
-import { CompanyTechnical } from "@/components/company-detail/CompanyTechnical";
-import { CompanyProjects } from "@/components/company-detail/CompanyProjects";
-import { CompanyContact } from "@/components/company-detail/CompanyContact";
+import { CompanyOverview } from "@/components/company-detail/CompanyOverview";
+import { CompanyVideo } from "@/components/company-detail/CompanyVideo";
+import { CompanyContent } from "@/components/company-detail/CompanyContent";
+import { CompanyImageGallery } from "@/components/company-detail/CompanyImageGallery";
+import { getGradientBackground } from "@/lib/utils/color";
 import type { CompanyDetail } from "@/lib/types/company-detail.types";
 
 interface CompanyDetailPreviewProps {
@@ -45,19 +45,27 @@ export function CompanyDetailPreview({ companyId }: CompanyDetailPreviewProps) {
   }
 
   const brandColor = company.brand_color || "#3B82F6";
+  const gradientBackground = getGradientBackground(brandColor);
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen" style={{ background: gradientBackground }}>
       <CompanyHero company={company} brandColor={brandColor} />
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <CompanyPortfolio company={company} />
-          <CompanyTechnical company={company} brandColor={brandColor} />
-          <CompanyProjects company={company} brandColor={brandColor} />
-        </div>
-        <div className="lg:col-span-1 space-y-6">
-          <CompanyInfo company={company} brandColor={brandColor} />
-          <CompanyContact company={company} brandColor={brandColor} />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="space-y-8">
+          <CompanyOverview company={company} brandColor={brandColor} />
+          {company.video_url && (
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <h2
+                className="text-2xl font-bold mb-4"
+                style={{ color: brandColor }}
+              >
+                기업소개 동영상
+              </h2>
+              <CompanyVideo videoUrl={company.video_url} />
+            </div>
+          )}
+          <CompanyContent company={company} />
+          <CompanyImageGallery company={company} />
         </div>
       </div>
     </div>

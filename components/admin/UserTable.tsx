@@ -127,6 +127,10 @@ export function UserTable({ users, onUserUpdate }: UserTableProps) {
     });
   };
 
+  const formatGradeLabel = (grade: string) => {
+    return grade.toUpperCase();
+  };
+
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
       <div className="overflow-x-auto">
@@ -189,13 +193,15 @@ export function UserTable({ users, onUserUpdate }: UserTableProps) {
                       }
                       disabled={updatingIds.has(user.id)}
                     >
-                      <SelectTrigger className="w-32 h-8 text-xs">
-                        <SelectValue />
+                      <SelectTrigger className="w-48 h-8 text-xs">
+                        <SelectValue>
+                          {user.user_grade ? formatGradeLabel(user.user_grade) : ""}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="basic">basic</SelectItem>
-                        <SelectItem value="enterprise">enterprise</SelectItem>
-                        <SelectItem value="enterprise_trial">enterprise_trial</SelectItem>
+                        <SelectItem value="basic">BASIC</SelectItem>
+                        <SelectItem value="enterprise">ENTERPRISE</SelectItem>
+                        <SelectItem value="enterprise_trial">ENTERPRISE_TRIAL</SelectItem>
                       </SelectContent>
                     </Select>
                   </td>

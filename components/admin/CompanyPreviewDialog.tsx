@@ -89,19 +89,23 @@ export function CompanyPreviewDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="max-h-[95vh] overflow-y-auto p-8"
+        className="max-h-[95vh] overflow-y-auto p-0"
         style={{
           maxWidth: '98vw',
           width: '98vw',
         }}
       >
-        <DialogHeader>
-          <DialogTitle>기업 정보 상세보기</DialogTitle>
-        </DialogHeader>
+        <div className="sticky top-0 z-50 bg-white border-b px-6 py-4">
+          <DialogHeader>
+            <DialogTitle>기업 정보 상세보기</DialogTitle>
+          </DialogHeader>
+        </div>
 
-        <CompanyDetailPreview companyId={company.id} />
+        <div className="overflow-y-auto max-h-[calc(95vh-120px)]">
+          <CompanyDetailPreview companyId={company.id} />
+        </div>
 
-        <div className="flex gap-2 justify-end mt-4 pt-4 border-t">
+        <div className="sticky bottom-0 bg-white border-t px-6 py-4 flex gap-2 justify-end">
           <Button
             variant="outline"
             onClick={handleEdit}
