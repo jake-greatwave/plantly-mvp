@@ -445,6 +445,7 @@ export const CategorySection = memo(function CategorySection({
             <UpgradePrompt
               feature="소분류 태그"
               upgradeSource="소분류 태그"
+              variant="inline"
               onUpgradeSuccess={onUpgradeSuccess}
             />
           )}

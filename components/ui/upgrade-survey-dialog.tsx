@@ -122,9 +122,9 @@ export function UpgradeSurveyDialog({
                 e.preventDefault();
                 setIsPricingDialogOpen(true);
               }}
-              className="text-blue-600 underline hover:text-blue-700"
+              className="text-blue-600 underline hover:text-blue-700 font-bold text-lg"
             >
-              예상 가격 정책
+              예상가격정책(클릭)
             </a>
             에 대한 간단한 의견(4문항)만 주시면,
             <br />

@@ -4,9 +4,9 @@ import { Mail, Phone, MapPin, User } from "lucide-react";
 export function Footer() {
   return (
     <footer className="bg-gray-900 text-gray-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
         {/* 메인 정보 영역 */}
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-3 mb-2">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-3 mb-1">
           {/* 로고 */}
           <div className="flex items-center">
             <Image
@@ -63,8 +63,15 @@ export function Footer() {
           </div>
         </div>
 
+        {/* 카카오톡 문구 */}
+        <div className="border-t border-gray-800 pt-1 pb-1">
+          <p className="text-xs text-gray-400 text-center">
+            카카오톡 "플랜틀리주식회사" 검색
+          </p>
+        </div>
+
         {/* 저작권 - 하단 */}
-        <div className="border-t border-gray-800 pt-2">
+        <div className="border-t border-gray-800 pt-1">
           <p className="text-xs text-gray-400 text-center">
             © {new Date().getFullYear()} (주)플랜틀리. All rights reserved.
           </p>
