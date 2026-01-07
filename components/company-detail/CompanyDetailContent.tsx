@@ -5,6 +5,7 @@ import { CompanyContent } from "./CompanyContent";
 import { CompanyImageGallery } from "./CompanyImageGallery";
 import { ViewCounter } from "./ViewCounter";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/utils/auth";
 import { getGradientBackground } from "@/lib/utils/color";
 import type { CompanyDetail } from "@/lib/types/company-detail.types";
 
@@ -15,6 +16,7 @@ interface CompanyDetailContentProps {
 async function fetchCompany(id: string): Promise<CompanyDetail | null> {
   try {
     const supabase = await createClient();
+    const user = await getCurrentUser();
 
     const baseQuery = supabase
       .from("companies")
@@ -68,7 +70,9 @@ async function fetchCompany(id: string): Promise<CompanyDetail | null> {
       return null;
     }
 
-    if (!data.is_verified) {
+    // 본인 기업이거나 인증된 기업만 표시
+    const isOwnCompany = user && data.user_id === user.userId;
+    if (!data.is_verified && !isOwnCompany) {
       return null;
     }
 

@@ -60,7 +60,7 @@ export function CompanyOverview({ company, brandColor }: CompanyOverviewProps) {
 
   const countries =
     company.company_regions
-      ?.filter((cr) => cr.regions?.region_type === "country")
+      ?.filter((cr) => cr.regions && cr.regions.region_type === "country")
       .map((cr) => cr.regions?.region_name)
       .filter(Boolean) || [];
 
