@@ -32,6 +32,7 @@ export const VideoSection = memo(function VideoSection({
       </div>
 
       <div className="space-y-2">
+        <Label htmlFor="video_url">동영상 링크</Label>
         {canUploadVideo ? (
           <Input
             id="video_url"
@@ -41,12 +42,7 @@ export const VideoSection = memo(function VideoSection({
             placeholder="회사 소개 영상이나 주요 설비 가동 영상에 대한 유튜브 링크를 입력해 주세요"
           />
         ) : (
-          <UpgradePrompt
-            feature="회사 소개 동영상"
-            upgradeSource="회사 소개 동영상"
-            variant="overlay"
-            onUpgradeSuccess={onUpgradeSuccess}
-          >
+          <>
             <Input
               id="video_url"
               type="url"
@@ -55,9 +51,17 @@ export const VideoSection = memo(function VideoSection({
               placeholder="회사 소개 영상이나 주요 설비 가동 영상에 대한 유튜브 링크를 입력해 주세요"
               disabled={true}
             />
-          </UpgradePrompt>
+            <UpgradePrompt
+              feature="회사 소개 동영상"
+              upgradeSource="회사 소개 동영상"
+              variant="inline"
+              onUpgradeSuccess={onUpgradeSuccess}
+            />
+          </>
         )}
       </div>
     </div>
   );
 });
+
+

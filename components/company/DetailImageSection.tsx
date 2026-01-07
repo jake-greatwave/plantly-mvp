@@ -60,25 +60,36 @@ export const DetailImageSection = memo(function DetailImageSection({
       <div className="space-y-2">
         <Label>이미지 업로드</Label>
         {needsUpgrade ? (
-          <UpgradePrompt
-            feature="상세 이미지"
-            upgradeSource="상세 이미지"
-            variant="overlay"
-            onUpgradeSuccess={onUpgradeSuccess}
-          >
+          <>
             <FileUploadField
               value={data.images || []}
               onChange={(value) => onFieldChange("images", value)}
               maxFiles={freeImageLimit}
               disabled={true}
             />
-          </UpgradePrompt>
+            <UpgradePrompt
+              feature="상세 이미지"
+              upgradeSource="상세 이미지"
+              variant="inline"
+              onUpgradeSuccess={onUpgradeSuccess}
+            />
+          </>
         ) : (
-          <FileUploadField
-            value={data.images || []}
-            onChange={(value) => onFieldChange("images", value)}
-            maxFiles={maxFiles}
-          />
+          <>
+            <FileUploadField
+              value={data.images || []}
+              onChange={(value) => onFieldChange("images", value)}
+              maxFiles={maxFiles}
+            />
+            {isBasicGrade && (
+              <UpgradePrompt
+                feature="상세 이미지"
+                upgradeSource="상세 이미지"
+                variant="inline"
+                onUpgradeSuccess={onUpgradeSuccess}
+              />
+            )}
+          </>
         )}
         <p className="text-sm text-gray-500">
           여기에 상세페이지 이미지를 등록해 주세요. (권장 너비: 860px / JPG, PNG 파일)

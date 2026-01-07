@@ -69,6 +69,7 @@ export function UpgradePrompt({ feature, upgradeSource, children, variant = 'inl
         open={surveyOpen}
         onOpenChange={setSurveyOpen}
         feature={feature}
+        upgradeSource={upgradeSource || feature}
         onSuccess={handleSurveySuccess}
       />
     </>
