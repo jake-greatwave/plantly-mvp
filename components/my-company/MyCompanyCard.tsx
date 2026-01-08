@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Pencil, Trash2, Building2, Eye, MapPin, Phone, Mail, Globe, User } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
+import { formatFullAddress } from '@/lib/utils/address'
 import { toast } from 'sonner'
-import { formatAddressShort } from '@/lib/utils/address'
 
 interface MyCompanyCardProps {
   company: any
@@ -127,7 +127,9 @@ export function MyCompanyCard({ company, onDelete }: MyCompanyCardProps) {
             {company.address && (
               <div className="flex items-start gap-2 text-sm text-gray-700">
                 <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                <span className="line-clamp-1">{formatAddressShort(company.address)}</span>
+                <span className="line-clamp-1">
+                  {formatFullAddress(company.address, company.address_detail)}
+                </span>
               </div>
             )}
             {company.manager_phone && (

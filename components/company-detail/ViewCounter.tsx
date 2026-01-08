@@ -26,3 +26,4 @@ export function ViewCounter({ companyId }: ViewCounterProps) {
   return null; // UI 렌더링 없음
 }
 
+

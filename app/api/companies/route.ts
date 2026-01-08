@@ -523,11 +523,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const supabase = await createClient();
 
-    const fullAddress = body.address
-      ? body.address_detail
-        ? `${body.address} ${body.address_detail}`
-        : body.address
-      : null;
+    // address 필드에는 기본 주소만 저장 (address_detail은 별도 필드에 저장)
+    // 표시할 때는 address만 표시하거나, address_detail이 address에 포함되지 않은 경우만 추가
 
     const { data: company, error } = await supabase
       .from("companies")
@@ -542,7 +539,7 @@ export async function POST(request: NextRequest) {
         manager_email: body.manager_email,
         website: body.website,
         postcode: body.postcode || null,
-        address: fullAddress,
+        address: body.address || null,
         address_detail: body.address_detail || null,
         equipment: body.equipment_list,
         materials: body.materials,
