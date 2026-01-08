@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CompanyPreviewDialog } from "./CompanyPreviewDialog";
-import { formatFullAddress } from "@/lib/utils/address";
+import { formatAddressShort } from "@/lib/utils/address";
 import { toast } from "sonner";
 import type { AdminCompany } from "@/lib/types/admin-company.types";
 
@@ -231,9 +231,7 @@ export function CompanyCard({ company, onUpdate, onDelete }: CompanyCardProps) {
               {company.address && (
                 <div className="flex items-center gap-1 text-xs text-gray-600 mb-2">
                   <MapPin className="w-3 h-3 shrink-0" />
-                  <span className="truncate">
-                    {formatFullAddress(company.address, company.address_detail)}
-                  </span>
+                  <span className="truncate">{formatAddressShort(company.address)}</span>
                 </div>
               )}
 

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Building2, Star, MapPin } from "lucide-react";
-import { formatFullAddress } from "@/lib/utils/address";
+import { formatAddressShort } from "@/lib/utils/address";
 import type { Database } from "@/lib/types/database.types";
 
 type Company = Database["public"]["Tables"]["companies"]["Row"] & {
@@ -100,9 +100,7 @@ function RecentCompanyCard({ company }: RecentCompanyCardProps) {
             {company.address && (
               <div className="flex items-center gap-1 text-xs text-gray-600">
                 <MapPin className="w-3 h-3 text-gray-400 flex-shrink-0" />
-                <span className="line-clamp-1">
-                  {formatFullAddress(company.address, company.address_detail)}
-                </span>
+                <span className="line-clamp-1">{formatAddressShort(company.address)}</span>
               </div>
             )}
             {industryList.length > 0 && (
