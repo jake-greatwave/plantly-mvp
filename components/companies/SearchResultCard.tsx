@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Building2, Star, MapPin } from "lucide-react";
-import { formatAddressShort } from "@/lib/utils/address";
+import { formatFullAddress } from "@/lib/utils/address";
 import type { Database } from "@/lib/types/database.types";
 
 type Company = Database["public"]["Tables"]["companies"]["Row"] & {
@@ -107,7 +107,9 @@ export function SearchResultCard({ company }: SearchResultCardProps) {
         {company.address && (
           <div className="flex items-center gap-1.5 mb-3 text-xs text-gray-500">
             <MapPin className="w-3.5 h-3.5 shrink-0" />
-            <span className="line-clamp-1">{formatAddressShort(company.address)}</span>
+            <span className="line-clamp-1">
+              {formatFullAddress(company.address, company.address_detail)}
+            </span>
           </div>
         )}
 

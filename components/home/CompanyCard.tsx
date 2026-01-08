@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Building2, MapPin, Star, CheckCircle2 } from 'lucide-react'
-import { formatAddressShort } from '@/lib/utils/address'
 
 interface CompanyCardProps {
   id: string
@@ -105,7 +104,7 @@ export function CompanyCard({
             {location && (
               <div className="flex items-center gap-1 text-xs text-gray-600">
                 <MapPin className="w-3 h-3 text-gray-400 flex-shrink-0" />
-                <span className="line-clamp-1">{formatAddressShort(location)}</span>
+                <span className="line-clamp-1">{location}</span>
               </div>
             )}
             {industryArray.length > 0 && (

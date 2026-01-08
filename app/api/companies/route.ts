@@ -523,11 +523,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const supabase = await createClient();
 
-    const fullAddress = body.address
-      ? body.address_detail
-        ? `${body.address} ${body.address_detail}`
-        : body.address
-      : null;
+    // address 필드에는 기본 주소만 저장 (address_detail은 별도 필드에 저장)
+    // 표시할 때는 address만 표시하거나, address_detail이 address에 포함되지 않은 경우만 추가
 
     const { data: company, error } = await supabase
       .from("companies")
@@ -542,7 +539,7 @@ export async function POST(request: NextRequest) {
         manager_email: body.manager_email,
         website: body.website,
         postcode: body.postcode || null,
-        address: fullAddress,
+        address: body.address || null,
         address_detail: body.address_detail || null,
         equipment: body.equipment_list,
         materials: body.materials,
@@ -621,44 +618,72 @@ export async function POST(request: NextRequest) {
       await supabase.from("company_tags").insert(tagInserts);
     }
 
-    if (body.countries && Array.isArray(body.countries)) {
-      if (body.countries.length > 0) {
-        const { data: regions, error: regionsError } = await supabase
+    if (body.countries && Array.isArray(body.countries) && body.countries.length > 0) {
+      const { data: existingRegions, error: regionsError } = await supabase
+        .from("regions")
+        .select("id, region_name")
+        .eq("region_type", "country")
+        .in("region_name", body.countries);
+
+      if (regionsError) {
+        console.error("Regions query error:", regionsError);
+      }
+
+      const regionMap = new Map<string, string>();
+      if (existingRegions) {
+        existingRegions.forEach((r) => {
+          regionMap.set(r.region_name, r.id);
+        });
+      }
+
+      // 직접입력한 국가가 regions 테이블에 없으면 생성
+      const missingCountries = body.countries.filter(
+        (country: string) => !regionMap.has(country)
+      );
+
+      if (missingCountries.length > 0) {
+        const newRegions = missingCountries.map((country: string, index: number) => ({
+          region_type: "country" as const,
+          region_name: country,
+          region_code: country.substring(0, 2).toUpperCase(),
+          display_order: existingRegions ? existingRegions.length + index : index,
+          is_active: true,
+        }));
+
+        const { data: insertedRegions, error: insertRegionError } = await supabase
           .from("regions")
-          .select("id, region_name")
-          .eq("region_type", "country")
-          .in("region_name", body.countries);
+          .insert(newRegions)
+          .select("id, region_name");
 
-        if (regionsError) {
-          console.error("Regions query error:", regionsError);
+        if (insertRegionError) {
+          console.error("Failed to insert new regions:", insertRegionError);
+        } else if (insertedRegions) {
+          insertedRegions.forEach((r) => {
+            regionMap.set(r.region_name, r.id);
+          });
         }
+      }
 
-        if (regions && regions.length > 0) {
-          const regionMap = new Map(
-            regions.map((r) => [r.region_name, r.id])
+      // company_regions에 저장
+      const countryInserts = body.countries
+        .filter((country: string) => regionMap.has(country))
+        .map((country: string) => ({
+          company_id: companyId,
+          region_id: regionMap.get(country)!,
+          region_type: "country" as const,
+        }));
+
+      if (countryInserts.length > 0) {
+        const { error: insertError } = await supabase
+          .from("company_regions")
+          .insert(countryInserts);
+
+        if (insertError) {
+          console.error("Company regions insert error:", insertError);
+          return NextResponse.json(
+            { success: false, error: "대응 가능 국가 저장에 실패했습니다." },
+            { status: 500 }
           );
-
-          const countryInserts = body.countries
-            .filter((country: string) => regionMap.has(country))
-            .map((country: string) => ({
-              company_id: companyId,
-              region_id: regionMap.get(country),
-              region_type: "country" as const,
-            }));
-
-          if (countryInserts.length > 0) {
-            const { error: insertError } = await supabase
-              .from("company_regions")
-              .insert(countryInserts);
-
-            if (insertError) {
-              console.error("Company regions insert error:", insertError);
-            }
-          } else {
-            console.warn("No valid countries found in regions table:", body.countries);
-          }
-        } else {
-          console.warn("No regions found for countries:", body.countries);
         }
       }
     }
