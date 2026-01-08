@@ -11,7 +11,7 @@ import {
   DollarSign,
   MapPin,
 } from "lucide-react";
-import { formatAddressShort } from "@/lib/utils/address";
+import { formatFullAddress } from "@/lib/utils/address";
 import type { CompanyDetail } from "@/lib/types/company-detail.types";
 
 interface CompanyContactProps {
@@ -22,7 +22,7 @@ interface CompanyContactProps {
 export function CompanyContact({ company, brandColor }: CompanyContactProps) {
   const countries =
     company.company_regions
-      ?.filter((cr) => cr.regions?.region_type === "country")
+      ?.filter((cr) => cr.regions && cr.regions.region_type === "country")
       .map((cr) => cr.regions?.region_name)
       .filter(Boolean) || [];
 
@@ -99,8 +99,7 @@ export function CompanyContact({ company, brandColor }: CompanyContactProps) {
             <div>
               <p className="text-sm text-gray-500">주소</p>
               <p className="text-sm text-gray-900">
-                {company.address}
-                {company.address_detail && ` ${company.address_detail}`}
+                {formatFullAddress(company.address, company.address_detail)}
               </p>
             </div>
           </div>

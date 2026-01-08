@@ -31,7 +31,8 @@ export async function GET() {
       .select(`
         *,
         company_images(id, image_url, image_type, display_order),
-        company_categories(category_id, categories(id, category_name))
+        company_categories(category_id, categories(id, category_name)),
+        company_tags(id, tag_name)
       `)
       .eq('user_id', user.userId)
       .order('created_at', { ascending: false })

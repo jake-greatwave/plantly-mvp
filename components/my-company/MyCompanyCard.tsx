@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Pencil, Trash2, Building2, Eye, MapPin, Phone, Mail, Globe, User } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
-import { toast } from 'sonner'
 import { formatAddressShort } from '@/lib/utils/address'
+import { toast } from 'sonner'
 
 interface MyCompanyCardProps {
   company: any
@@ -22,6 +22,8 @@ export function MyCompanyCard({ company, onDelete }: MyCompanyCardProps) {
   const mainImage = company.company_images?.find((img: any) => img.image_type === 'main')?.image_url || null
 
   const categories = company.company_categories?.map((cc: any) => cc.categories?.category_name).filter(Boolean) || []
+  const customTags = company.company_tags?.map((tag: any) => tag.tag_name) || []
+  const allTags = [...categories, ...customTags]
 
   const handlePreview = () => {
     router.push(`/companies/${company.id}`)
@@ -148,17 +150,17 @@ export function MyCompanyCard({ company, onDelete }: MyCompanyCardProps) {
             )}
           </div>
 
-          {categories.length > 0 && (
+          {allTags.length > 0 && (
             <div className="mb-3">
               <div className="flex flex-wrap gap-2">
-                {categories.slice(0, 3).map((category: string, index: number) => (
+                {allTags.slice(0, 3).map((tag: string, index: number) => (
                   <Badge key={index} variant="outline" className="text-xs">
-                    {category}
+                    {tag}
                   </Badge>
                 ))}
-                {categories.length > 3 && (
+                {allTags.length > 3 && (
                   <Badge variant="outline" className="text-xs">
-                    +{categories.length - 3}
+                    +{allTags.length - 3}
                   </Badge>
                 )}
               </div>

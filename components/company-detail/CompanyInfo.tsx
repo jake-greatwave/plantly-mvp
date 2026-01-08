@@ -3,7 +3,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Calendar, User } from "lucide-react";
-import { formatAddressShort } from "@/lib/utils/address";
+import { formatFullAddress } from "@/lib/utils/address";
 import type { CompanyDetail } from "@/lib/types/company-detail.types";
 
 interface CompanyInfoProps {
@@ -64,7 +64,7 @@ export function CompanyInfo({ company, brandColor }: CompanyInfoProps) {
             <div>
               <p className="text-sm text-gray-500">주소</p>
               <p className="text-sm font-medium text-gray-900">
-                {formatAddressShort(company.address)}
+                {formatFullAddress(company.address, company.address_detail)}
               </p>
             </div>
           </div>

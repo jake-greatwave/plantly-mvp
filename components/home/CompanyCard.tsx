@@ -3,8 +3,8 @@
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Building2, MapPin, Star, CheckCircle2 } from 'lucide-react'
 import { formatAddressShort } from '@/lib/utils/address'
+import { Building2, MapPin, Star, CheckCircle2 } from 'lucide-react'
 
 interface CompanyCardProps {
   id: string

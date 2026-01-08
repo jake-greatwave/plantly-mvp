@@ -231,9 +231,7 @@ export function CompanyCard({ company, onUpdate, onDelete }: CompanyCardProps) {
               {company.address && (
                 <div className="flex items-center gap-1 text-xs text-gray-600 mb-2">
                   <MapPin className="w-3 h-3 shrink-0" />
-                  <span className="truncate">
-                    {formatAddressShort(company.address)}
-                  </span>
+                  <span className="truncate">{formatAddressShort(company.address)}</span>
                 </div>
               )}
 
