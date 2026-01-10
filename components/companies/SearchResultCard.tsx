@@ -52,10 +52,14 @@ export function SearchResultCard({ company }: SearchResultCardProps) {
     ? Object.values(industries)
     : [];
 
+  // 카테고리와 직접입력 태그를 모두 합쳐서 표시
   const categories =
     company.company_categories
       ?.map((cc) => cc.categories?.category_name)
       .filter(Boolean) || [];
+  
+  const tags = company.company_tags?.map((tag) => tag.tag_name) || [];
+  const allTags = [...categories, ...tags];
 
   const handleClick = () => {
     router.push(`/companies/${company.id}`);
@@ -128,16 +132,16 @@ export function SearchResultCard({ company }: SearchResultCardProps) {
           </div>
         )}
 
-        {categories.length > 0 && (
+        {allTags.length > 0 && (
           <div className="mt-auto pt-2 border-t border-gray-100">
             <div className="flex flex-wrap gap-1.5">
-              {categories.slice(0, 2).map((category, index) => (
+              {allTags.slice(0, 2).map((tag, index) => (
                 <Badge
                   key={index}
                   variant="outline"
                   className="text-xs border-gray-300 text-gray-600"
                 >
-                  {category}
+                  {tag}
                 </Badge>
               ))}
             </div>

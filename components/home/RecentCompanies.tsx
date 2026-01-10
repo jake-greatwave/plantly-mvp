@@ -22,6 +22,10 @@ type Company = Database["public"]["Tables"]["companies"]["Row"] & {
     image_type: "main" | "portfolio" | "facility" | null;
     display_order: number;
   }>;
+  company_tags?: Array<{
+    id: string;
+    tag_name: string;
+  }>;
 };
 
 interface RecentCompanyCardProps {
@@ -36,10 +40,14 @@ function RecentCompanyCard({ company }: RecentCompanyCardProps) {
     company.company_images?.sort((a, b) => a.display_order - b.display_order)[0]?.image_url ||
     company.logo_url;
 
+  // 카테고리와 직접입력 태그를 모두 합쳐서 표시
   const categories =
     company.company_categories
       ?.map((cc) => cc.categories?.category_name)
       .filter(Boolean) || [];
+  
+  const tags = company.company_tags?.map((tag) => tag.tag_name) || [];
+  const allTags = [...categories, ...tags];
 
   const industries = company.industries
     ? (typeof company.industries === "string"
@@ -118,24 +126,24 @@ function RecentCompanyCard({ company }: RecentCompanyCardProps) {
             )}
           </div>
 
-          {categories.length > 0 && (
+          {allTags.length > 0 && (
             <div className="pt-2 border-t border-gray-200">
               <div className="flex flex-wrap gap-0.5">
-                {categories.slice(0, 3).map((category, index) => (
+                {allTags.slice(0, 3).map((tag, index) => (
                   <Badge
                     key={index}
                     variant="outline"
                     className="text-[10px] border-gray-300 text-gray-600 px-1 py-0.5"
                   >
-                    #{category}
+                    #{tag}
                   </Badge>
                 ))}
-                {categories.length > 3 && (
+                {allTags.length > 3 && (
                   <Badge
                     variant="outline"
                     className="text-[10px] border-gray-300 text-gray-600 px-1 py-0.5"
                   >
-                    +{categories.length - 3}
+                    +{allTags.length - 3}
                   </Badge>
                 )}
               </div>

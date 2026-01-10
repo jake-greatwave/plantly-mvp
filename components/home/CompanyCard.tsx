@@ -41,9 +41,10 @@ export function CompanyCard({
     router.push(`/companies/${id}`)
   }
 
-  const allTags = tags.length > 0 
-    ? tags.map(t => `#${t.tag_name}`)
-    : categories.map(c => c.categories?.category_name).filter(Boolean).map(name => `#${name}`)
+  // 카테고리와 직접입력 태그를 모두 합쳐서 표시
+  const categoryNames = categories.map(c => c.categories?.category_name).filter(Boolean)
+  const tagNames = tags.map(t => t.tag_name)
+  const allTags = [...categoryNames, ...tagNames].map(name => `#${name}`)
   
   const displayTags = allTags.slice(0, 3)
   const remainingCount = Math.max(0, allTags.length - 3)
