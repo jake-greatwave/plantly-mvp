@@ -123,7 +123,10 @@ export function CompanyOverview({ company, brandColor }: CompanyOverviewProps) {
                   <div>
                     <p className="text-sm text-gray-500">주소</p>
                     <p className="text-sm font-medium text-gray-900">
-                      {formatFullAddress(company.address, company.address_detail)}
+                      {formatFullAddress(
+                        company.address,
+                        company.address_detail
+                      )}
                     </p>
                   </div>
                 </div>
@@ -229,12 +232,11 @@ export function CompanyOverview({ company, brandColor }: CompanyOverviewProps) {
 
           <div>
             <h3 className="text-lg font-semibold mb-3 text-gray-900">
-              거래 조건
+              대응 가능 국가
             </h3>
             <div className="space-y-3">
               {countries.length > 0 && (
                 <div>
-                  <p className="text-sm text-gray-500 mb-2">대응 가능 국가</p>
                   <div className="flex flex-wrap gap-2">
                     {countries.map((country, index) => (
                       <Badge

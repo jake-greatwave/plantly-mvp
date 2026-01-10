@@ -34,10 +34,7 @@ export function CompanyContact({ company, brandColor }: CompanyContactProps) {
 
   return (
     <Card className="p-6">
-      <h2
-        className="text-xl font-bold mb-6"
-        style={{ color: brandColor }}
-      >
+      <h2 className="text-xl font-bold mb-6" style={{ color: brandColor }}>
         연락처 & 거래 조건
       </h2>
 
@@ -160,4 +157,3 @@ export function CompanyContact({ company, brandColor }: CompanyContactProps) {
     </Card>
   );
 }
-
