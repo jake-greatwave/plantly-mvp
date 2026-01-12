@@ -29,7 +29,7 @@ export function CompanyProjects({ company, brandColor }: CompanyProjectsProps) {
         {company.project_title && (
           <div>
             <h4 className="text-sm font-medium text-gray-600 mb-1.5">주요 프로젝트</h4>
-            <p className="text-sm text-gray-700 leading-relaxed line-clamp-2">
+            <p className="text-sm text-gray-700 leading-relaxed">
               {company.project_title}
             </p>
           </div>
@@ -38,7 +38,7 @@ export function CompanyProjects({ company, brandColor }: CompanyProjectsProps) {
         {company.achievements && (
           <div>
             <h4 className="text-sm font-medium text-gray-600 mb-1.5">주요 성과</h4>
-            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap line-clamp-3">
+            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
               {company.achievements}
             </p>
           </div>
@@ -47,7 +47,7 @@ export function CompanyProjects({ company, brandColor }: CompanyProjectsProps) {
         {company.partners && (
           <div>
             <h4 className="text-sm font-medium text-gray-600 mb-1.5">주요 파트너</h4>
-            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap line-clamp-2">
+            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
               {company.partners}
             </p>
           </div>
