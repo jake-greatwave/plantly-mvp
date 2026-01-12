@@ -6,6 +6,9 @@ import Placeholder from "@tiptap/extension-placeholder";
 import Image from "@tiptap/extension-image";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
+import TextAlign from "@tiptap/extension-text-align";
+import Link from "@tiptap/extension-link";
+import Underline from "@tiptap/extension-underline";
 import { Extension } from "@tiptap/core";
 import {
   Bold,
@@ -18,6 +21,14 @@ import {
   Redo,
   Palette,
   Type,
+  Underline as UnderlineIcon,
+  Strikethrough,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
+  Link as LinkIcon,
+  Quote,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -101,13 +112,27 @@ const FontSize = Extension.create({
 export function ContentEditor({ content, onChange }: ContentEditorProps) {
   const [colorOpen, setColorOpen] = useState(false);
   const [selectedColor, setSelectedColor] = useState("#000000");
+  const [linkOpen, setLinkOpen] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        // Strike는 StarterKit에 포함되어 있음
+      }),
       TextStyle,
       Color,
       FontSize,
+      Underline,
+      TextAlign.configure({
+        types: ["heading", "paragraph"],
+      }),
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: "text-blue-600 underline cursor-pointer",
+        },
+      }),
       Placeholder.configure({
         placeholder:
           "기업 소개, 제품 설명, 회사 문화 등을 자유롭게 작성해주세요",
@@ -145,14 +170,52 @@ export function ContentEditor({ content, onChange }: ContentEditorProps) {
       }
     };
 
-    editor.on("selectionUpdate", updateColor);
-    editor.on("update", updateColor);
+    const updateLink = () => {
+      if (editor.isActive("link")) {
+        const href = editor.getAttributes("link").href;
+        setLinkUrl(href || "");
+      } else {
+        setLinkUrl("");
+      }
+    };
+
+    editor.on("selectionUpdate", () => {
+      updateColor();
+      updateLink();
+    });
+    editor.on("update", () => {
+      updateColor();
+      updateLink();
+    });
 
     return () => {
       editor.off("selectionUpdate", updateColor);
       editor.off("update", updateColor);
     };
   }, [editor]);
+
+  const handleLinkSubmit = () => {
+    if (!editor || !linkUrl.trim()) {
+      return;
+    }
+
+    const url = linkUrl.trim().startsWith("http") 
+      ? linkUrl.trim() 
+      : `https://${linkUrl.trim()}`;
+
+    if (editor.isActive("link")) {
+      editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+    } else {
+      const selectedText = editor.state.selection.content().size > 0
+        ? editor.state.doc.textBetween(
+            editor.state.selection.from,
+            editor.state.selection.to
+          )
+        : url;
+      editor.chain().focus().insertContent(`<a href="${url}">${selectedText}</a>`).run();
+    }
+    setLinkOpen(false);
+  };
 
   if (!editor) {
     return null;
@@ -178,6 +241,24 @@ export function ContentEditor({ content, onChange }: ContentEditorProps) {
           className={editor.isActive("italic") ? "bg-gray-200" : ""}
         >
           <Italic className="w-4 h-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          className={editor.isActive("underline") ? "bg-gray-200" : ""}
+        >
+          <UnderlineIcon className="w-4 h-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleStrike().run()}
+          className={editor.isActive("strike") ? "bg-gray-200" : ""}
+        >
+          <Strikethrough className="w-4 h-4" />
         </Button>
         <Popover open={colorOpen} onOpenChange={setColorOpen}>
           <PopoverTrigger asChild>
@@ -319,6 +400,15 @@ export function ContentEditor({ content, onChange }: ContentEditorProps) {
         >
           <Heading2 className="w-4 h-4" />
         </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleBlockquote().run()}
+          className={editor.isActive("blockquote") ? "bg-gray-200" : ""}
+        >
+          <Quote className="w-4 h-4" />
+        </Button>
         <div className="w-px h-6 bg-gray-300 mx-1" />
         <Button
           type="button"
@@ -343,6 +433,115 @@ export function ContentEditor({ content, onChange }: ContentEditorProps) {
           type="button"
           variant="ghost"
           size="sm"
+          onClick={() => editor.chain().focus().setTextAlign("left").run()}
+          className={
+            editor.isActive({ textAlign: "left" }) ? "bg-gray-200" : ""
+          }
+        >
+          <AlignLeft className="w-4 h-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().setTextAlign("center").run()}
+          className={
+            editor.isActive({ textAlign: "center" }) ? "bg-gray-200" : ""
+          }
+        >
+          <AlignCenter className="w-4 h-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().setTextAlign("right").run()}
+          className={
+            editor.isActive({ textAlign: "right" }) ? "bg-gray-200" : ""
+          }
+        >
+          <AlignRight className="w-4 h-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().setTextAlign("justify").run()}
+          className={
+            editor.isActive({ textAlign: "justify" }) ? "bg-gray-200" : ""
+          }
+        >
+          <AlignJustify className="w-4 h-4" />
+        </Button>
+        <div className="w-px h-6 bg-gray-300 mx-1" />
+        <Popover open={linkOpen} onOpenChange={setLinkOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                if (editor.isActive("link")) {
+                  const href = editor.getAttributes("link").href;
+                  setLinkUrl(href || "");
+                } else {
+                  setLinkUrl("");
+                }
+              }}
+              className={editor.isActive("link") ? "bg-gray-200" : ""}
+            >
+              <LinkIcon className="w-4 h-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 p-3">
+            <div className="space-y-3">
+              <div className="text-sm font-medium">링크 추가/수정</div>
+              <input
+                type="url"
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                placeholder="https://example.com"
+                className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleLinkSubmit();
+                  }
+                }}
+              />
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLinkSubmit}
+                  className="flex-1"
+                >
+                  {editor.isActive("link") ? "수정" : "추가"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    editor.chain().focus().unsetLink().run();
+                    setLinkUrl("");
+                    setLinkOpen(false);
+                  }}
+                  disabled={!editor.isActive("link")}
+                  className="flex-1"
+                >
+                  제거
+                </Button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+        <div className="w-px h-6 bg-gray-300 mx-1" />
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
           onClick={() => editor.chain().focus().undo().run()}
           disabled={!editor.can().undo()}
         >
@@ -358,7 +557,7 @@ export function ContentEditor({ content, onChange }: ContentEditorProps) {
           <Redo className="w-4 h-4" />
         </Button>
       </div>
-      <div className="prose prose-sm max-w-none">
+      <div className="prose prose-sm max-w-none [&_.ProseMirror]:outline-none">
         <EditorContent editor={editor} />
       </div>
     </div>
