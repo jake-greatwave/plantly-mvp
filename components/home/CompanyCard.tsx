@@ -69,12 +69,12 @@ export function CompanyCard({
       className="bg-white border-gray-200 overflow-hidden hover:border-blue-600 hover:shadow-lg transition-all cursor-pointer"
     >
       <div className="flex">
-        <div className="relative w-28 h-28 flex-shrink-0 bg-white overflow-hidden p-2">
+        <div className="relative w-28 h-28 flex-shrink-0 bg-gray-50 overflow-hidden p-2">
           {imageToShow ? (
             <img 
               src={imageToShow} 
               alt={name} 
-              className="w-full h-full object-cover rounded"
+              className="w-full h-full object-contain rounded"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-white rounded">

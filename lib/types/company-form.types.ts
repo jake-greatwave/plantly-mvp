@@ -51,14 +51,16 @@ export const PRICING_TYPES = [
 ];
 
 export const CERTIFICATIONS = [
-  "ISO9001",
-  "ISO14001",
-  "ISO45001",
-  "IATF16949",
+  "ISO 9001 (품질경영)",
+  "ISO 14001 (환경경영)",
+  "ISO 45001 (안전보건)",
+  "IATF 16949 (자동차 품질경영)",
+  "자동차 OEM 품질 기준 대응 또는 SQ 인증",
+  "KC 인증 대응",
+  "CE 인증 대응",
+  "UL 인증 대응",
+  "클린 환경·청정 공정 요구사항 대응 가능",
   "특허 보유",
-  "KC인증",
-  "CE인증",
-  "UL인증",
 ];
 
 export const COUNTRIES = [
