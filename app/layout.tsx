@@ -11,6 +11,11 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.png",
   },
+  verification: {
+    other: {
+      "naver-site-verification": "5f0635a76f7d769fba90ce8f955b859228095f80",
+    },
+  },
 };
 
 export default function RootLayout({
