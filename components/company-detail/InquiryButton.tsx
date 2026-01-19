@@ -38,7 +38,7 @@ export function InquiryButton({ brandColor }: InquiryButtonProps) {
 
   return (
     <Button
-      className="w-32 h-12 font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:opacity-90"
+      className="w-32 h-12 font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:opacity-90 cursor-pointer"
       style={{
         backgroundColor: "#3764E4",
         color: "white",
