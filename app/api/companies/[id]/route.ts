@@ -149,7 +149,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
       .from('companies')
       .update({
         company_name: body.company_name,
-        business_number: body.business_number,
+        business_number: body.business_number || '',
         intro_title: body.intro_title,
         ceo_name: body.ceo_name,
         manager_name: body.manager_name,
@@ -184,14 +184,6 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
     if (error) {
       console.error('Company update error:', error)
-      
-      if (error.code === '23505' && error.message?.includes('business_number')) {
-        return NextResponse.json(
-          { success: false, error: '이미 등록된 사업자등록번호입니다.' },
-          { status: 409 }
-        )
-      }
-      
       return NextResponse.json(
         { success: false, error: '기업 정보 수정에 실패했습니다.' },
         { status: 500 }

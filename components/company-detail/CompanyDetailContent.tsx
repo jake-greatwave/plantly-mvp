@@ -24,7 +24,6 @@ async function fetchCompany(id: string): Promise<CompanyDetail | null> {
         id,
         user_id,
         company_name,
-        business_number,
         ceo_name,
         establishment_date,
         postcode,

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, Building2, BarChart3 } from "lucide-react";
+import { Users, Building2, BarChart3, Link2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const menuItems = [
@@ -20,6 +20,11 @@ const menuItems = [
     href: "/admin/surveys",
     label: "설문 통계",
     icon: BarChart3,
+  },
+  {
+    href: "/admin/inquiry-links",
+    label: "문의하기 링크 관리",
+    icon: Link2,
   },
 ];
 
