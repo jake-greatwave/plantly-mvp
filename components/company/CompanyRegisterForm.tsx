@@ -47,7 +47,6 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
   const formDataRef = useRef<Partial<CompanyFormData>>(DEFAULT_FORM_DATA)
   const [isSaving, setIsSaving] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
-  const [isBusinessNumberVerified, setIsBusinessNumberVerified] = useState(false)
   const [userGrade, setUserGrade] = useState<'basic' | 'enterprise' | 'enterprise_trial'>(initialUserGrade as 'basic' | 'enterprise' | 'enterprise_trial')
   const [isAdmin, setIsAdmin] = useState(initialIsAdmin)
   
@@ -132,7 +131,6 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
         const loadedData = {
           main_image: mainImage,
           company_name: company.company_name,
-          business_number: company.business_number,
           intro_title: company.intro_title,
           ceo_name: company.ceo_name || '',
           manager_name: company.manager_name || '',
@@ -182,9 +180,6 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
       formDataRef.current = updated
       return updated
     })
-    if (field === 'business_number') {
-      setIsBusinessNumberVerified(false)
-    }
   }, [])
 
   const handleFieldsChange = useCallback((fields: Partial<CompanyFormData>) => {
@@ -219,9 +214,6 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
     if (!formData.company_name) {
       return { isValid: false, errorField: '기업명', section: 'basic' }
     }
-    if (!formData.business_number) {
-      return { isValid: false, errorField: '사업자번호', section: 'basic' }
-    }
     if (!formData.ceo_name) {
       return { isValid: false, errorField: '대표자명', section: 'basic' }
     }
@@ -230,9 +222,6 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
     }
     if (!formData.address_detail) {
       return { isValid: false, errorField: '상세주소', section: 'basic' }
-    }
-    if (!formData.category_ids || formData.category_ids.length === 0) {
-      return { isValid: false, errorField: '소분류', section: 'category' }
     }
     return { isValid: true }
   }
@@ -264,49 +253,6 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
       return
     }
 
-    if (!companyId && formData.business_number) {
-      const cleanedNumber = formData.business_number.replace(/-/g, '')
-      if (cleanedNumber.length === 10 && /^\d{10}$/.test(cleanedNumber)) {
-        try {
-          const verifyResponse = await fetch('/api/business/verify', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              businessNumber: cleanedNumber,
-            }),
-          })
-
-          const verifyResult = await verifyResponse.json()
-
-          if (!verifyResult.success) {
-            toast.error(verifyResult.error || '사업자등록번호 검증에 실패했습니다. 유효한 사업자등록번호를 입력해주세요.')
-            if (basicInfoRef.current) {
-              basicInfoRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
-              setTimeout(() => {
-                window.scrollBy(0, -100)
-              }, 300)
-            }
-            return
-          }
-        } catch (error) {
-          console.error('Business verification error:', error)
-          toast.error('사업자등록번호 검증 중 오류가 발생했습니다.')
-          return
-        }
-      } else {
-        toast.error('사업자등록번호는 10자리 숫자여야 합니다.')
-        if (basicInfoRef.current) {
-          basicInfoRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
-          setTimeout(() => {
-            window.scrollBy(0, -100)
-          }, 300)
-        }
-        return
-      }
-    }
-
     setIsSaving(true)
     try {
       const url = companyId ? `/api/companies/${companyId}` : '/api/companies'
@@ -331,16 +277,6 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
 
       if (!response.ok) {
         toast.error(data.error || '저장에 실패했습니다.')
-        
-        if (data.error?.includes('사업자등록번호')) {
-          if (basicInfoRef.current) {
-            basicInfoRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
-            setTimeout(() => {
-              window.scrollBy(0, -100)
-            }, 300)
-          }
-        }
-        
         return
       }
 
@@ -374,7 +310,7 @@ export function CompanyRegisterForm({ companyId, isAdmin: initialIsAdmin = false
 
       <Card className="p-6 space-y-8">
         <div ref={basicInfoRef}>
-          <BasicInfoSection data={formData} onFieldChange={handleFieldChange} onVerificationChange={setIsBusinessNumberVerified} />
+          <BasicInfoSection data={formData} onFieldChange={handleFieldChange} />
         </div>
         <Separator />
         <MainImageSection data={formData} onFieldChange={handleFieldChange} />

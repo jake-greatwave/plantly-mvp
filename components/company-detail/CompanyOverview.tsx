@@ -18,6 +18,7 @@ import {
   Briefcase,
 } from "lucide-react";
 import { formatFullAddress } from "@/lib/utils/address";
+import { InquiryButton } from "./InquiryButton";
 import type { CompanyDetail } from "@/lib/types/company-detail.types";
 
 interface CompanyOverviewProps {
@@ -176,59 +177,91 @@ export function CompanyOverview({ company, brandColor }: CompanyOverviewProps) {
           <div>
             <h3 className="text-lg font-semibold mb-3 text-gray-900">연락처</h3>
             <div className="space-y-3">
-              {company.manager_name && (
-                <div>
-                  <p className="text-sm text-gray-500 mb-1">담당자</p>
-                  <p className="text-sm font-medium text-gray-900">
-                    {company.manager_name}
-                    {company.manager_position &&
-                      ` (${company.manager_position})`}
-                  </p>
-                </div>
-              )}
+              {(() => {
+                const hasContactInfo =
+                  company.manager_name ||
+                  company.manager_phone ||
+                  company.manager_email ||
+                  company.website;
 
-              {company.manager_phone && (
-                <div className="flex items-center gap-3">
-                  <Phone className="w-5 h-5 text-gray-400 shrink-0" />
-                  <a
-                    href={`tel:${company.manager_phone}`}
-                    className="text-sm text-gray-900 hover:underline transition-colors"
-                    style={{ color: brandColor }}
-                  >
-                    {company.manager_phone}
-                  </a>
-                </div>
-              )}
+                return (
+                  <>
+                    {!hasContactInfo && (
+                      <div className="mb-4">
+                        <InquiryButton brandColor={brandColor} />
+                      </div>
+                    )}
 
-              {company.manager_email && (
-                <div className="flex items-center gap-3">
-                  <Mail className="w-5 h-5 text-gray-400 shrink-0" />
-                  <a
-                    href={`mailto:${company.manager_email}`}
-                    className="text-sm hover:underline break-all transition-colors"
-                    style={{ color: brandColor }}
-                  >
-                    {company.manager_email}
-                  </a>
-                </div>
-              )}
+                    {company.manager_name && (
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">담당자</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {company.manager_name}
+                          {company.manager_position &&
+                            ` (${company.manager_position})`}
+                        </p>
+                      </div>
+                    )}
 
-              {company.website && (
-                <div className="flex items-center gap-3">
-                  <Globe className="w-5 h-5 text-gray-400 shrink-0" />
-                  <a
-                    href={company.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm hover:underline break-all transition-colors"
-                    style={{ color: brandColor }}
-                  >
-                    {company.website}
-                  </a>
-                </div>
-              )}
+                    {company.manager_phone && (
+                      <div className="flex items-center gap-3">
+                        <Phone className="w-5 h-5 text-gray-400 shrink-0" />
+                        <a
+                          href={`tel:${company.manager_phone}`}
+                          className="text-sm text-gray-900 hover:underline transition-colors"
+                          style={{ color: brandColor }}
+                        >
+                          {company.manager_phone}
+                        </a>
+                      </div>
+                    )}
+
+                    {company.manager_email && (
+                      <div className="flex items-center gap-3">
+                        <Mail className="w-5 h-5 text-gray-400 shrink-0" />
+                        <a
+                          href={`mailto:${company.manager_email}`}
+                          className="text-sm hover:underline break-all transition-colors"
+                          style={{ color: brandColor }}
+                        >
+                          {company.manager_email}
+                        </a>
+                      </div>
+                    )}
+
+                    {company.website && (
+                      <div className="flex items-center gap-3">
+                        <Globe className="w-5 h-5 text-gray-400 shrink-0" />
+                        <a
+                          href={company.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm hover:underline break-all transition-colors"
+                          style={{ color: brandColor }}
+                        >
+                          {company.website}
+                        </a>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </div>
+
+          {(() => {
+            const hasContactInfo =
+              company.manager_name ||
+              company.manager_phone ||
+              company.manager_email ||
+              company.website;
+
+            return hasContactInfo ? (
+              <div className="py-2">
+                <InquiryButton brandColor={brandColor} />
+              </div>
+            ) : null;
+          })()}
 
           <div>
             <h3 className="text-lg font-semibold mb-3 text-gray-900">
