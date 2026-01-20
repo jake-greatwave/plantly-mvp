@@ -1,7 +1,7 @@
 export interface Company {
   id: string
   user_id: string
-  business_number: string
+  business_number: string | null
   company_name: string
   ceo_name: string
   establishment_date: string | null
@@ -21,7 +21,7 @@ export interface Company {
 }
 
 export interface CompanyFormData {
-  business_number: string
+  business_number?: string | null
   company_name: string
   ceo_name: string
   establishment_date?: string

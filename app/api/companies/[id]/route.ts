@@ -149,7 +149,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
       .from('companies')
       .update({
         company_name: body.company_name,
-        business_number: body.business_number || '',
+        business_number: body.business_number?.trim() || null,
         intro_title: body.intro_title,
         ceo_name: body.ceo_name,
         manager_name: body.manager_name,

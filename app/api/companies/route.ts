@@ -531,7 +531,7 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id: user.userId,
         company_name: body.company_name,
-        business_number: body.business_number || '',
+        business_number: body.business_number?.trim() || null,
         intro_title: body.intro_title,
         ceo_name: body.ceo_name,
         manager_name: body.manager_name,

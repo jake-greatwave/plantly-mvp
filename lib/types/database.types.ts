@@ -89,7 +89,7 @@ export type Database = {
         Row: {
           id: string;
           user_id: string;
-          business_number: string;
+          business_number: string | null;
           company_name: string;
           ceo_name: string;
           establishment_date: string | null;
@@ -128,7 +128,7 @@ export type Database = {
         Insert: {
           id?: string;
           user_id: string;
-          business_number: string;
+          business_number?: string | null;
           company_name: string;
           ceo_name: string;
           establishment_date?: string | null;
