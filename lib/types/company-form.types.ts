@@ -1,7 +1,7 @@
 export interface CompanyFormData {
   main_image: string;
   company_name: string;
-  business_number: string;
+  business_number?: string | null;
   intro_title: string;
   ceo_name: string;
   manager_name: string;
