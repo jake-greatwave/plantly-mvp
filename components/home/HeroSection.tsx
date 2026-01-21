@@ -22,7 +22,7 @@ export function HeroSection() {
         <div className="text-center mb-6">
           <h2 className="text-3xl md:text-4xl font-bold text-blue-600 mb-3">
             <span className="block md:inline">제조의 모든 연결,</span>
-            <span className="block md:inline">플랜틀리에서 시작됩니다</span>
+            <span className="block md:inline"> 플랜틀리에서 시작됩니다</span>
           </h2>
           <p className="text-lg text-gray-600">
             프로젝트를 맡길 기업과 해결할 기업이 한 곳에서 만나는 제조 플랫폼
